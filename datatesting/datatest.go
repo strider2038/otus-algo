@@ -9,7 +9,9 @@ import (
 	"time"
 )
 
-var ErrEmptyInput = errors.New("empty input")
+var (
+	ErrEmptyInput = errors.New("empty input")
+)
 
 type Solver interface {
 	Solve(input []string) (string, error)
