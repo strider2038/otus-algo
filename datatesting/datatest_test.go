@@ -9,13 +9,14 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	datatesting.Run(t, datatesting.SolverFunc(func(input []string) (string, error) {
+	datatesting.Run(t, datatesting.SolverFunc(func(input []string, want string) error {
 		if len(input) == 0 {
-			return "", datatesting.ErrEmptyInput
+			return datatesting.ErrNotEnoughArguments
 		}
 
 		length := utf8.RuneCountInString(input[0])
+		got := strconv.Itoa(length)
 
-		return strconv.Itoa(length), nil
+		return datatesting.AssertEqual(want, got)
 	}))
 }

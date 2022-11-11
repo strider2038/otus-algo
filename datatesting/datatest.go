@@ -9,18 +9,16 @@ import (
 	"time"
 )
 
-var (
-	ErrEmptyInput = errors.New("empty input")
-)
+var ErrNotEnoughArguments = errors.New("not enough arguments")
 
 type Solver interface {
-	Solve(input []string) (string, error)
+	Solve(input []string, output string) error
 }
 
-type SolverFunc func(input []string) (string, error)
+type SolverFunc func(input []string, output string) error
 
-func (f SolverFunc) Solve(input []string) (string, error) {
-	return f(input)
+func (f SolverFunc) Solve(input []string, output string) error {
+	return f(input, output)
 }
 
 var defaultRunner = NewRunner()
@@ -92,17 +90,15 @@ func (r *Runner) Run(t *testing.T, solver Solver) {
 			break
 		}
 
-		t.Run(fmt.Sprintf("test %d: %s", i, string(input)), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test %d (%s)", i, strings.TrimSpace(string(input))), func(t *testing.T) {
 			start := time.Now()
 			defer func() {
 				t.Log("elapsed time:", time.Since(start).String())
 			}()
 
-			actual, err := solver.Solve(r.parseInput(input))
+			err := solver.Solve(r.parseInput(input), strings.TrimSpace(string(output)))
 			if err != nil {
 				t.Error(err)
-			} else if actual != strings.TrimSpace(string(output)) {
-				t.Errorf(`fail: want "%s", got "%s"`, output, actual)
 			}
 		})
 	}
@@ -112,6 +108,9 @@ func (r *Runner) parseInput(input []byte) []string {
 	args := strings.Split(string(input), r.separator)
 	if len(args) > 0 && args[len(args)-1] == "" {
 		return args[:len(args)-1]
+	}
+	for i := range args {
+		args[i] = strings.TrimSpace(args[i])
 	}
 
 	return args

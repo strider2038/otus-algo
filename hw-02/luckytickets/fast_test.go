@@ -11,19 +11,21 @@ import (
 
 type Solver func(N int) int
 
-func (s Solver) Solve(input []string) (string, error) {
+func (s Solver) Solve(input []string, output string) error {
 	if len(input) == 0 {
-		return "", datatesting.ErrEmptyInput
+		return datatesting.ErrNotEnoughArguments
 	}
 
 	n, err := strconv.Atoi(input[0])
 	if err != nil {
-		return "", fmt.Errorf("parse N: %w", err)
+		return fmt.Errorf("parse N: %w", err)
+	}
+	want, err := strconv.Atoi(output)
+	if err != nil {
+		return fmt.Errorf("parse expected result: %w", err)
 	}
 
-	count := s(n)
-
-	return strconv.Itoa(count), nil
+	return datatesting.AssertEqual(want, s(n))
 }
 
 func TestCountFast(t *testing.T) {
