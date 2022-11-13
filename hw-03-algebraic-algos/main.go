@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	// testPowerAlgorithms()
-	// testFibonacciAlgorithms()
+	testPowerAlgorithms()
+	testFibonacciAlgorithms()
 	testPrimeAlgorithms()
 }
 

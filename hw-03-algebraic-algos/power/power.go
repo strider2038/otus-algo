@@ -22,10 +22,10 @@ func Logarithmic(a float64, n int) float64 {
 	pow := 1.0
 
 	for n > 0 {
-		if n&1 == 1 {
+		if n&1 == 1 { // эквивалент n % 2 == 1
 			pow = pow * d
 		}
-		n = n >> 1
+		n = n >> 1 // эквивалент n = n / 2
 		d = d * d
 	}
 
