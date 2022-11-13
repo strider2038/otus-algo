@@ -5,6 +5,8 @@ import (
 	"math/big"
 )
 
+// Recursive - рекурсивный алгоритм поиска чисел Фибоначчи.
+// Сложность O(2^N).
 func Recursive(n int) *big.Int {
 	if n <= 0 {
 		return big.NewInt(0)
@@ -19,6 +21,8 @@ func Recursive(n int) *big.Int {
 	return f
 }
 
+// Iterative - итеративный алгоритм поиска чисел Фибоначчи.
+// Сложность O(N).
 func Iterative(n int) *big.Int {
 	if n <= 0 {
 		return big.NewInt(0)
@@ -39,6 +43,8 @@ func Iterative(n int) *big.Int {
 	return a
 }
 
+// ByMatrix - алгоритм поиска чисел Фибоначчи через умножение матриц.
+// Сложность O(LogN).
 func ByMatrix(n int) *big.Int {
 	if n <= 0 {
 		return big.NewInt(0)

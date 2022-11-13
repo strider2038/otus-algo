@@ -1,5 +1,7 @@
 package power
 
+// Iterative - итеративный алгоритм возведения числа в степень.
+// Сложность O(N).
 func Iterative(a float64, n int) float64 {
 	if n == 0 {
 		return 1
@@ -13,6 +15,8 @@ func Iterative(a float64, n int) float64 {
 	return pow
 }
 
+// Logarithmic - алгоритм возведения в степень через двоичное разложение показателя степени.
+// Сложность O(2LogN) = O(LogN).
 func Logarithmic(a float64, n int) float64 {
 	d := a
 	pow := 1.0

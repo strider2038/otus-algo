@@ -28,8 +28,7 @@ func (s Solver) Solve(input []string, output string) error {
 }
 
 func TestCountByBruteForce(t *testing.T) {
-	runner := datatesting.NewRunner(datatesting.WithLimit(9))
-	// runner := datatesting.NewRunner(datatesting.WithLimit(10))
+	runner := datatesting.NewRunner(datatesting.WithLimit(10))
 	runner.Run(t, Solver(prime.CountByBruteForce))
 }
 

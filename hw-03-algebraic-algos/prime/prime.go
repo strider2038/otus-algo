@@ -5,6 +5,7 @@ import (
 	"math/bits"
 )
 
+// CountByBruteForce - алгоритм поиска количества простых чисел через перебор делителей, O(N^2).
 func CountByBruteForce(n int) int {
 	count := 0
 
@@ -21,6 +22,8 @@ func CountByBruteForce(n int) int {
 	return count
 }
 
+// CountByBruteForceOptimized - алгоритм поиска количества простых чисел через
+// перебор делителей с применением оптимизаций.
 func CountByBruteForceOptimized(n int) int {
 	count := 0
 
@@ -53,6 +56,8 @@ func isPrime(n int) bool {
 	return true
 }
 
+// CountByPrimes - алгоритм поиска простых чисел с оптимизациями поиска
+// и делением только на простые числа, O(N * Sqrt(N) / Ln (N)).
 func CountByPrimes(n int) int {
 	if n <= 1 {
 		return 0
@@ -93,6 +98,8 @@ func isPrimeWithPrimes(n int, primes []int) bool {
 	return true
 }
 
+// CountBySieveOfEratosthenes - алгоритм "Решето Эратосфена" для быстрого поиска
+// простых чисел O(N Log Log N).
 func CountBySieveOfEratosthenes(n int) int {
 	if n <= 1 {
 		return 0
@@ -101,9 +108,9 @@ func CountBySieveOfEratosthenes(n int) int {
 	primes := NewBoolSieve(n)
 
 	for i := 2; i*i <= n; i++ {
-		if primes.IsPrime(i) {
+		if primes.IsSet(i) {
 			for j := i * i; j <= n; j += i {
-				primes.SetFalse(j)
+				primes.Unset(j)
 			}
 		}
 	}
@@ -111,6 +118,9 @@ func CountBySieveOfEratosthenes(n int) int {
 	return primes.Count()
 }
 
+// CountBySieveOfEratosthenesOptimized - алгоритм "Решето Эратосфена" с оптимизацией памяти,
+// с использованием битовой матрицы, с сохранением по 32 значения в одном int,
+// биты хранятся только для нечётных чисел.
 func CountBySieveOfEratosthenesOptimized(n int) int {
 	if n <= 1 {
 		return 0
@@ -119,9 +129,9 @@ func CountBySieveOfEratosthenesOptimized(n int) int {
 	primes := NewBitSieve(n)
 
 	for i := 2; i*i <= n; i++ {
-		if primes.IsPrime(i) {
+		if primes.IsSet(i) {
 			for j := i * i; j <= n; j += i {
-				primes.SetFalse(j)
+				primes.Unset(j)
 			}
 		}
 	}
@@ -141,11 +151,11 @@ func NewBoolSieve(n int) BoolSieve {
 	return sieve
 }
 
-func (s BoolSieve) IsPrime(i int) bool {
+func (s BoolSieve) IsSet(i int) bool {
 	return s[i-2]
 }
 
-func (s BoolSieve) SetFalse(i int) {
+func (s BoolSieve) Unset(i int) {
 	s[i-2] = false
 }
 
@@ -185,7 +195,7 @@ func NewBitSieve(n int) BitSieve {
 	return sieve
 }
 
-func (s BitSieve) IsPrime(i int) bool {
+func (s BitSieve) IsSet(i int) bool {
 	if i&1 == 0 {
 		return i == 2
 	}
@@ -196,7 +206,7 @@ func (s BitSieve) IsPrime(i int) bool {
 	return s[index]&(1<<bitIndex) != 0
 }
 
-func (s BitSieve) SetFalse(i int) {
+func (s BitSieve) Unset(i int) {
 	if i&1 == 0 {
 		return
 	}
