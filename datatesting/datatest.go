@@ -90,7 +90,7 @@ func (r *Runner) Run(t *testing.T, solver Solver) {
 			break
 		}
 
-		t.Run(fmt.Sprintf("test %d: %s", i, string(input)), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test %d (%s)", i, strings.TrimSpace(string(input))), func(t *testing.T) {
 			start := time.Now()
 			defer func() {
 				t.Log("elapsed time:", time.Since(start).String())
@@ -108,6 +108,9 @@ func (r *Runner) parseInput(input []byte) []string {
 	args := strings.Split(string(input), r.separator)
 	if len(args) > 0 && args[len(args)-1] == "" {
 		return args[:len(args)-1]
+	}
+	for i := range args {
+		args[i] = strings.TrimSpace(args[i])
 	}
 
 	return args
