@@ -12,12 +12,12 @@ import (
 var ErrNotEnoughArguments = errors.New("not enough arguments")
 
 type Solver interface {
-	Solve(input []string, output string) error
+	Solve(input, output []string) error
 }
 
-type SolverFunc func(input []string, output string) error
+type SolverFunc func(input, output []string) error
 
-func (f SolverFunc) Solve(input []string, output string) error {
+func (f SolverFunc) Solve(input, output []string) error {
 	return f(input, output)
 }
 
@@ -96,7 +96,7 @@ func (r *Runner) Run(t *testing.T, solver Solver) {
 				t.Log("elapsed time:", time.Since(start).String())
 			}()
 
-			err := solver.Solve(r.parseInput(input), strings.TrimSpace(string(output)))
+			err := solver.Solve(r.parseStrings(input), r.parseStrings(output))
 			if err != nil {
 				t.Error(err)
 			}
@@ -104,7 +104,7 @@ func (r *Runner) Run(t *testing.T, solver Solver) {
 	}
 }
 
-func (r *Runner) parseInput(input []byte) []string {
+func (r *Runner) parseStrings(input []byte) []string {
 	args := strings.Split(string(input), r.separator)
 	if len(args) > 0 && args[len(args)-1] == "" {
 		return args[:len(args)-1]
