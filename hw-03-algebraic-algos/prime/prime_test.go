@@ -11,15 +11,15 @@ import (
 
 type Solver func(n int) int
 
-func (s Solver) Solve(input []string, output string) error {
-	if len(input) < 1 {
+func (s Solver) Solve(input, output []string) error {
+	if len(input) < 1 || len(output) < 1 {
 		return datatesting.ErrNotEnoughArguments
 	}
 	n, err := strconv.Atoi(input[0])
 	if err != nil {
 		return fmt.Errorf("parse N: %w", err)
 	}
-	want, err := strconv.Atoi(output)
+	want, err := strconv.Atoi(output[0])
 	if err != nil {
 		return fmt.Errorf("parse output: %w", err)
 	}

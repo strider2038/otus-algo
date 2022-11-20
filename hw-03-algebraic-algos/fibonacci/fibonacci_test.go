@@ -12,8 +12,8 @@ import (
 
 type BigIntSolver func(n int) *big.Int
 
-func (s BigIntSolver) Solve(input []string, output string) error {
-	if len(input) < 1 {
+func (s BigIntSolver) Solve(input, output []string) error {
+	if len(input) < 1 || len(output) < 1 {
 		return datatesting.ErrNotEnoughArguments
 	}
 	n, err := strconv.Atoi(input[0])
@@ -21,7 +21,7 @@ func (s BigIntSolver) Solve(input []string, output string) error {
 		return fmt.Errorf("parse N: %w", err)
 	}
 	want := new(big.Int)
-	want, ok := want.SetString(output, 10)
+	want, ok := want.SetString(output[0], 10)
 	if !ok {
 		return fmt.Errorf("parse output")
 	}

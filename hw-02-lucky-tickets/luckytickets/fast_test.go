@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/hw-02/luckytickets"
+	"github.com/strider2038/otus-algo/hw-02-lucky-tickets/luckytickets"
 )
 
 type Solver func(N int) int
 
-func (s Solver) Solve(input []string, output string) error {
-	if len(input) == 0 {
+func (s Solver) Solve(input []string, output []string) error {
+	if len(input) == 0 || len(output) == 0 {
 		return datatesting.ErrNotEnoughArguments
 	}
 
@@ -20,7 +20,7 @@ func (s Solver) Solve(input []string, output string) error {
 	if err != nil {
 		return fmt.Errorf("parse N: %w", err)
 	}
-	want, err := strconv.Atoi(output)
+	want, err := strconv.Atoi(output[0])
 	if err != nil {
 		return fmt.Errorf("parse expected result: %w", err)
 	}

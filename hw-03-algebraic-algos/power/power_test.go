@@ -11,8 +11,8 @@ import (
 
 type Solver func(a float64, n int) float64
 
-func (s Solver) Solve(input []string, output string) error {
-	if len(input) < 2 {
+func (s Solver) Solve(input []string, output []string) error {
+	if len(input) < 2 || len(output) < 1 {
 		return datatesting.ErrNotEnoughArguments
 	}
 	a, err := strconv.ParseFloat(input[0], 64)
@@ -23,7 +23,7 @@ func (s Solver) Solve(input []string, output string) error {
 	if err != nil {
 		return fmt.Errorf("parse N: %w", err)
 	}
-	want, err := strconv.ParseFloat(output, 64)
+	want, err := strconv.ParseFloat(output[0], 64)
 	if err != nil {
 		return fmt.Errorf("parse output: %w", err)
 	}
