@@ -2,7 +2,6 @@ package datatesting
 
 import (
 	"math"
-	"strings"
 	"testing"
 )
 
@@ -46,23 +45,4 @@ func AssertEqualFloatWithDelta(t *testing.T, want, got, delta float64) {
 	if math.Abs(want-got) > delta {
 		t.Errorf("test failed: want %v, got %v", want, got)
 	}
-}
-
-func AssertNoErrors(errs ...error) error {
-	var s strings.Builder
-
-	for _, err := range errs {
-		if err != nil {
-			if s.Len() > 0 {
-				s.WriteString("; ")
-			}
-			s.WriteString(err.Error())
-		}
-	}
-
-	if s.Len() > 0 {
-		return fmt.Errorf(s.String())
-	}
-
-	return nil
 }

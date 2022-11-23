@@ -1,7 +1,6 @@
 package bitboard_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -11,30 +10,28 @@ import (
 
 type Solver func(board uint8) (int, uint64)
 
-func (s Solver) Solve(input, output []string) error {
+func (s Solver) Solve(t *testing.T, input, output []string) {
 	if len(input) < 1 || len(output) < 2 {
-		return datatesting.ErrNotEnoughArguments
+		t.Fatal(datatesting.ErrNotEnoughArguments)
 	}
 
 	board, err := strconv.ParseUint(input[0], 10, 8)
 	if err != nil {
-		return fmt.Errorf("parse input: %w", err)
+		t.Fatalf("parse input: %v", err)
 	}
 	wantCount, err := strconv.ParseInt(output[0], 10, 64)
 	if err != nil {
-		return fmt.Errorf("parse output[0]: %w", err)
+		t.Fatalf("parse output[0]: %v", err)
 	}
 	wantMoves, err := strconv.ParseUint(output[1], 10, 64)
 	if err != nil {
-		return fmt.Errorf("parse output[1]: %w", err)
+		t.Fatalf("parse output[1]: %v", err)
 	}
 
 	gotCount, gotMoves := s(uint8(board))
 
-	return datatesting.AssertNoErrors(
-		datatesting.AssertEqual(wantCount, int64(gotCount)),
-		datatesting.AssertEqual(wantMoves, gotMoves),
-	)
+	datatesting.AssertEqual(t, wantCount, int64(gotCount))
+	datatesting.AssertEqual(t, wantMoves, gotMoves)
 }
 
 func TestKingMoves(t *testing.T) {
