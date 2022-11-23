@@ -1,7 +1,6 @@
 package prime_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -11,20 +10,20 @@ import (
 
 type Solver func(n int) int
 
-func (s Solver) Solve(input []string, output string) error {
-	if len(input) < 1 {
-		return datatesting.ErrNotEnoughArguments
+func (s Solver) Solve(t *testing.T, input, output []string) {
+	if len(input) < 1 || len(output) < 1 {
+		t.Fatal(datatesting.ErrNotEnoughArguments)
 	}
 	n, err := strconv.Atoi(input[0])
 	if err != nil {
-		return fmt.Errorf("parse N: %w", err)
+		t.Fatalf("parse N: %v", err)
 	}
-	want, err := strconv.Atoi(output)
+	want, err := strconv.Atoi(output[0])
 	if err != nil {
-		return fmt.Errorf("parse output: %w", err)
+		t.Fatalf("parse output: %v", err)
 	}
 
-	return datatesting.AssertEqual(want, s(n))
+	datatesting.AssertEqual(t, want, s(n))
 }
 
 func TestCountByBruteForce(t *testing.T) {

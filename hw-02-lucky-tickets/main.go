@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/strider2038/otus-algo/hw-02/luckytickets"
+	"github.com/strider2038/otus-algo/hw-02-lucky-tickets/luckytickets"
 )
 
 func main() {
