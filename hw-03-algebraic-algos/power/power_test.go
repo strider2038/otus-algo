@@ -1,7 +1,6 @@
 package power_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -11,24 +10,24 @@ import (
 
 type Solver func(a float64, n int) float64
 
-func (s Solver) Solve(input []string, output []string) error {
+func (s Solver) Solve(t *testing.T, input []string, output []string) {
 	if len(input) < 2 || len(output) < 1 {
-		return datatesting.ErrNotEnoughArguments
+		t.Fatal(datatesting.ErrNotEnoughArguments)
 	}
 	a, err := strconv.ParseFloat(input[0], 64)
 	if err != nil {
-		return fmt.Errorf("parse A: %w", err)
+		t.Fatalf("parse A: %v", err)
 	}
 	n, err := strconv.Atoi(input[1])
 	if err != nil {
-		return fmt.Errorf("parse N: %w", err)
+		t.Fatalf("parse N: %v", err)
 	}
 	want, err := strconv.ParseFloat(output[0], 64)
 	if err != nil {
-		return fmt.Errorf("parse output: %w", err)
+		t.Fatalf("parse output: %v", err)
 	}
 
-	return datatesting.AssertEqualFloat(want, s(a, n))
+	datatesting.AssertEqualFloat(t, want, s(a, n))
 }
 
 func TestIterative(t *testing.T) {
