@@ -38,47 +38,42 @@ func TestSortTable(t *testing.T) {
 		sort  func(items []int) []int
 		limit int
 	}{
-		// {
-		// 	name:  "bubble",
-		// 	sort:  basicsorts.Bubble[int],
-		// 	limit: 5,
-		// 	// limit: 6,
-		// },
-		// {
-		// 	name:  "bubble optimized",
-		// 	sort:  basicsorts.BubbleOptimized[int],
-		// 	limit: 5,
-		// 	// limit: 6,
-		// },
-		// {
-		// 	name:  "insertion",
-		// 	sort:  basicsorts.Insertion[int],
-		// 	limit: 6,
-		// },
-		// {
-		// 	name:  "insertion shift",
-		// 	sort:  basicsorts.InsertionShift[int],
-		// 	limit: 6,
-		// },
-		// {
-		// 	name:  "insertion binary search",
-		// 	sort:  basicsorts.InsertionBinarySearch[int],
-		// 	limit: 6,
-		// },
+		{
+			name:  "bubble",
+			sort:  basicsorts.Bubble[int],
+			limit: 6,
+		},
+		{
+			name:  "bubble optimized",
+			sort:  basicsorts.BubbleOptimized[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion",
+			sort:  basicsorts.Insertion[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion shift",
+			sort:  basicsorts.InsertionShift[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion binary search",
+			sort:  basicsorts.InsertionBinarySearch[int],
+			limit: 6,
+		},
 		{
 			name: "shell",
 			sort: basicsorts.Shell[int],
-			// limit: 7,
 		},
 		{
 			name: "shell frank and lazarus",
 			sort: basicsorts.ShellFrankLazarus[int],
-			// limit: 7,
 		},
 		{
 			name: "shell insertion",
 			sort: basicsorts.ShellInsertion[int],
-			// limit: 7,
 		},
 	}
 	arrayTypes := []struct {
