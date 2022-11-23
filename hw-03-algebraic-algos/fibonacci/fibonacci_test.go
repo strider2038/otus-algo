@@ -1,7 +1,6 @@
 package fibonacci_test
 
 import (
-	"fmt"
 	"math/big"
 	"strconv"
 	"testing"
@@ -12,26 +11,24 @@ import (
 
 type BigIntSolver func(n int) *big.Int
 
-func (s BigIntSolver) Solve(input, output []string) error {
+func (s BigIntSolver) Solve(t *testing.T, input, output []string) {
 	if len(input) < 1 || len(output) < 1 {
-		return datatesting.ErrNotEnoughArguments
+		t.Fatal(datatesting.ErrNotEnoughArguments)
 	}
 	n, err := strconv.Atoi(input[0])
 	if err != nil {
-		return fmt.Errorf("parse N: %w", err)
+		t.Fatalf("parse N: %v", err)
 	}
 	want := new(big.Int)
 	want, ok := want.SetString(output[0], 10)
 	if !ok {
-		return fmt.Errorf("parse output")
+		t.Fatalf("parse output")
 	}
 
 	got := s(n)
 	if want.Cmp(got) != 0 {
-		return fmt.Errorf(`test failed: want %s, got %s`, want.String(), got.String())
+		t.Errorf(`test failed: want %s, got %s`, want.String(), got.String())
 	}
-
-	return nil
 }
 
 func TestRecursive(t *testing.T) {
@@ -61,10 +58,7 @@ func TestMatrix_Mul(t *testing.T) {
 
 	m := m1.Mul(m2)
 
-	err := datatesting.AssertEqual("((19, 22), (43, 50))", m.String())
-	if err != nil {
-		t.Error(err)
-	}
+	datatesting.AssertEqual(t, "((19, 22), (43, 50))", m.String())
 }
 
 func TestMatrix_Pow(t *testing.T) {
@@ -85,10 +79,7 @@ func TestMatrix_Pow(t *testing.T) {
 
 			got := m.Pow(test.n)
 
-			err := datatesting.AssertEqual(test.want, got.String())
-			if err != nil {
-				t.Error(err)
-			}
+			datatesting.AssertEqual(t, test.want, got.String())
 		})
 	}
 }

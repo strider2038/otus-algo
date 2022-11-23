@@ -9,15 +9,15 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	datatesting.Run(t, datatesting.SolverFunc(func(input, output []string) error {
+	datatesting.Run(t, datatesting.SolverFunc(func(t *testing.T, input, output []string) {
 		if len(input) == 0 || len(output) == 0 {
-			return datatesting.ErrNotEnoughArguments
+			t.Fatal(datatesting.ErrNotEnoughArguments)
 		}
 
 		want := output[0]
 		length := utf8.RuneCountInString(input[0])
 		got := strconv.Itoa(length)
 
-		return datatesting.AssertEqual(want, got)
+		datatesting.AssertEqual(t, want, got)
 	}))
 }

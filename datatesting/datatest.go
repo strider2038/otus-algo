@@ -4,21 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
-	"time"
 )
 
 var ErrNotEnoughArguments = errors.New("not enough arguments")
 
 type Solver interface {
-	Solve(input, output []string) error
+	Solve(t *testing.T, input, output []string)
 }
 
-type SolverFunc func(input, output []string) error
+type SolverFunc func(t *testing.T, input, output []string)
 
-func (f SolverFunc) Solve(input, output []string) error {
-	return f(input, output)
+func (f SolverFunc) Solve(t *testing.T, input, output []string) {
+	t.Helper()
+	f(t, input, output)
 }
 
 var defaultRunner = NewRunner()
@@ -64,42 +65,41 @@ func WithLimit(limit int) Option {
 func (r *Runner) Run(t *testing.T, solver Solver) {
 	t.Helper()
 	problem, err := os.ReadFile(r.workdir + "problem.txt")
-	if err != nil {
+	if err == nil {
+		t.Log("ЗАДАЧА.\n", string(problem))
+	} else if !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("open testdata dir:", err)
 	}
-	t.Log("ЗАДАЧА.\n", string(problem))
 
 	for i := 0; ; i++ {
+		if r.limit > 0 && i >= r.limit {
+			t.Logf("test limit %d reached", i)
+			break
+		}
+
 		inputFilename := fmt.Sprintf("%stest.%d.in", r.workdir, i)
 		outputFilename := fmt.Sprintf("%stest.%d.out", r.workdir, i)
 
-		input, err := os.ReadFile(inputFilename)
+		inputData, err := os.ReadFile(inputFilename)
 		if errors.Is(err, os.ErrNotExist) {
 			break
 		}
 		if err != nil {
 			t.Fatalf(`open input file "%s": %s`, inputFilename, err)
 		}
-		output, err := os.ReadFile(outputFilename)
+		outputData, err := os.ReadFile(outputFilename)
 		if err != nil {
 			t.Fatalf(`open output file "%s": %s`, outputFilename, err)
 		}
 
-		if r.limit > 0 && i >= r.limit {
-			t.Logf("test limit %d reached", i)
-			break
+		input := r.parseStrings(inputData)
+		if len(input) < 1 {
+			t.Fatalf(`empty input`)
 		}
+		output := r.parseStrings(outputData)
 
-		t.Run(fmt.Sprintf("test %d (%s)", i, strings.TrimSpace(string(input))), func(t *testing.T) {
-			start := time.Now()
-			defer func() {
-				t.Log("elapsed time:", time.Since(start).String())
-			}()
-
-			err := solver.Solve(r.parseStrings(input), r.parseStrings(output))
-			if err != nil {
-				t.Error(err)
-			}
+		t.Run(fmt.Sprintf("test %d (%s)", i, strings.TrimSpace(input[0])), func(t *testing.T) {
+			solver.Solve(t, input, output)
 		})
 	}
 }
@@ -114,4 +114,19 @@ func (r *Runner) parseStrings(input []byte) []string {
 	}
 
 	return args
+}
+
+func ParseIntArray(input string) ([]int, error) {
+	var err error
+
+	rawNumbers := strings.Split(input, " ")
+	numbers := make([]int, len(rawNumbers))
+	for i, rawNumber := range rawNumbers {
+		numbers[i], err = strconv.Atoi(rawNumber)
+		if err != nil {
+			return nil, fmt.Errorf("parse number at %d: %w", i, err)
+		}
+	}
+
+	return numbers, nil
 }
