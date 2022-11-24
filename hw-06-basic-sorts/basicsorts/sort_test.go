@@ -34,20 +34,46 @@ func (s Solver) Solve(t *testing.T, input, output []string) {
 
 func TestSortTable(t *testing.T) {
 	tests := []struct {
-		name string
-		sort func(items []int) []int
+		name  string
+		sort  func(items []int) []int
+		limit int
 	}{
 		{
-			name: "bubble",
-			sort: basicsorts.Bubble[int],
+			name:  "bubble",
+			sort:  basicsorts.Bubble[int],
+			limit: 6,
 		},
 		{
-			name: "insertion",
-			sort: basicsorts.Insertion[int],
+			name:  "bubble optimized",
+			sort:  basicsorts.BubbleOptimized[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion",
+			sort:  basicsorts.Insertion[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion shift",
+			sort:  basicsorts.InsertionShift[int],
+			limit: 6,
+		},
+		{
+			name:  "insertion binary search",
+			sort:  basicsorts.InsertionBinarySearch[int],
+			limit: 6,
 		},
 		{
 			name: "shell",
 			sort: basicsorts.Shell[int],
+		},
+		{
+			name: "shell frank and lazarus",
+			sort: basicsorts.ShellFrankLazarus[int],
+		},
+		{
+			name: "shell insertion",
+			sort: basicsorts.ShellInsertion[int],
 		},
 	}
 	arrayTypes := []struct {
@@ -65,7 +91,7 @@ func TestSortTable(t *testing.T) {
 				t.Run(arrayType.name, func(t *testing.T) {
 					runner := datatesting.NewRunner(
 						datatesting.WithWorkdir(fmt.Sprintf("./../../testdata/sortdata/%s/", arrayType.dir)),
-						datatesting.WithLimit(5),
+						datatesting.WithLimit(test.limit),
 					)
 					runner.Run(t, Solver(test.sort))
 				})
@@ -84,12 +110,32 @@ func TestSort(t *testing.T) {
 			sort: basicsorts.Bubble[int],
 		},
 		{
+			name: "bubble optimized",
+			sort: basicsorts.BubbleOptimized[int],
+		},
+		{
 			name: "insertion",
 			sort: basicsorts.Insertion[int],
 		},
 		{
+			name: "insertion shift",
+			sort: basicsorts.InsertionShift[int],
+		},
+		{
+			name: "insertion binary search",
+			sort: basicsorts.InsertionBinarySearch[int],
+		},
+		{
 			name: "shell",
 			sort: basicsorts.Shell[int],
+		},
+		{
+			name: "shell frank and lazarus",
+			sort: basicsorts.ShellFrankLazarus[int],
+		},
+		{
+			name: "shell insertion",
+			sort: basicsorts.ShellInsertion[int],
 		},
 	}
 	for _, test := range tests {
