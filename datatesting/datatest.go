@@ -62,6 +62,12 @@ func WithLimit(limit int) Option {
 	}
 }
 
+func WithSeparator(separator string) Option {
+	return func(r *Runner) {
+		r.separator = separator
+	}
+}
+
 func (r *Runner) Run(t *testing.T, solver Solver) {
 	t.Helper()
 	problem, err := os.ReadFile(r.workdir + "problem.txt")
