@@ -9,9 +9,7 @@ func Selection[T Sortable](items []T) []T {
 			}
 		}
 
-		t := items[i]
-		items[i] = items[min]
-		items[min] = t
+		swap(items, i, min)
 	}
 
 	return items

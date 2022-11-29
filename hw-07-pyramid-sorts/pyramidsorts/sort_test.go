@@ -1,4 +1,4 @@
-package basicsorts_test
+package pyramidsorts_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/hw-06-basic-sorts/basicsorts"
+	"github.com/strider2038/otus-algo/hw-07-pyramid-sorts/pyramidsorts"
 )
 
 type Solver func(items []int) []int
@@ -39,41 +39,13 @@ func TestSortTable(t *testing.T) {
 		limit int
 	}{
 		{
-			name:  "bubble",
-			sort:  basicsorts.Bubble[int],
+			name:  "selection",
+			sort:  pyramidsorts.Selection[int],
 			limit: 6,
 		},
 		{
-			name:  "bubble optimized",
-			sort:  basicsorts.BubbleOptimized[int],
-			limit: 6,
-		},
-		{
-			name:  "insertion",
-			sort:  basicsorts.Insertion[int],
-			limit: 6,
-		},
-		{
-			name:  "insertion shift",
-			sort:  basicsorts.InsertionShift[int],
-			limit: 6,
-		},
-		{
-			name:  "insertion binary search",
-			sort:  basicsorts.InsertionBinarySearch[int],
-			limit: 6,
-		},
-		{
-			name: "shell",
-			sort: basicsorts.Shell[int],
-		},
-		{
-			name: "shell frank and lazarus",
-			sort: basicsorts.ShellFrankLazarus[int],
-		},
-		{
-			name: "shell insertion",
-			sort: basicsorts.ShellInsertion[int],
+			name: "heap",
+			sort: pyramidsorts.Heap[int],
 		},
 	}
 	arrayTypes := []struct {
@@ -106,36 +78,12 @@ func TestSort(t *testing.T) {
 		sort func(items []int) []int
 	}{
 		{
-			name: "bubble",
-			sort: basicsorts.Bubble[int],
+			name: "selection",
+			sort: pyramidsorts.Selection[int],
 		},
 		{
-			name: "bubble optimized",
-			sort: basicsorts.BubbleOptimized[int],
-		},
-		{
-			name: "insertion",
-			sort: basicsorts.Insertion[int],
-		},
-		{
-			name: "insertion shift",
-			sort: basicsorts.InsertionShift[int],
-		},
-		{
-			name: "insertion binary search",
-			sort: basicsorts.InsertionBinarySearch[int],
-		},
-		{
-			name: "shell",
-			sort: basicsorts.Shell[int],
-		},
-		{
-			name: "shell frank and lazarus",
-			sort: basicsorts.ShellFrankLazarus[int],
-		},
-		{
-			name: "shell insertion",
-			sort: basicsorts.ShellInsertion[int],
+			name: "heap",
+			sort: pyramidsorts.Heap[int],
 		},
 	}
 	for _, test := range tests {
@@ -145,14 +93,7 @@ func TestSort(t *testing.T) {
 
 			got := test.sort(items)
 
-			if len(wantItems) != len(got) {
-				t.Fatalf("different length: want %d, got %d", len(wantItems), len(got))
-			}
-			for i := 0; i < len(wantItems); i++ {
-				if wantItems[i] != got[i] {
-					t.Errorf("different items at %d: want %d, got %d", i, wantItems[i], got[i])
-				}
-			}
+			datatesting.AssertEqualArrays(t, wantItems, got)
 		})
 	}
 }

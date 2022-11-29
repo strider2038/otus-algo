@@ -1,4 +1,4 @@
-package basicsorts_test
+package sort_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/hw-06-basic-sorts/basicsorts"
+	"github.com/strider2038/otus-algo/hw-08-quick-external-sorts/sort"
 )
 
 type Solver func(items []int) []int
@@ -34,46 +34,35 @@ func (s Solver) Solve(t *testing.T, input, output []string) {
 
 func TestSortTable(t *testing.T) {
 	tests := []struct {
-		name  string
-		sort  func(items []int) []int
-		limit int
+		name         string
+		sort         func(items []int) []int
+		randomLimit  int
+		digitsLimit  int
+		sortedLimit  int
+		reverseLimit int
 	}{
 		{
-			name:  "bubble",
-			sort:  basicsorts.Bubble[int],
-			limit: 6,
+			name:         "quick right",
+			sort:         sort.QuickRight[int],
+			reverseLimit: 6,
 		},
 		{
-			name:  "bubble optimized",
-			sort:  basicsorts.BubbleOptimized[int],
-			limit: 6,
+			name: "quick middle",
+			sort: sort.QuickMiddle[int],
 		},
 		{
-			name:  "insertion",
-			sort:  basicsorts.Insertion[int],
-			limit: 6,
+			name:         "quick lomuto",
+			sort:         sort.QuickLomuto[int],
+			digitsLimit:  6,
+			reverseLimit: 6,
 		},
 		{
-			name:  "insertion shift",
-			sort:  basicsorts.InsertionShift[int],
-			limit: 6,
+			name: "merge",
+			sort: sort.Merge[int],
 		},
 		{
-			name:  "insertion binary search",
-			sort:  basicsorts.InsertionBinarySearch[int],
-			limit: 6,
-		},
-		{
-			name: "shell",
-			sort: basicsorts.Shell[int],
-		},
-		{
-			name: "shell frank and lazarus",
-			sort: basicsorts.ShellFrankLazarus[int],
-		},
-		{
-			name: "shell insertion",
-			sort: basicsorts.ShellInsertion[int],
+			name: "merge with buffer",
+			sort: sort.MergeWithBuffer[int],
 		},
 	}
 	arrayTypes := []struct {
@@ -89,9 +78,20 @@ func TestSortTable(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			for _, arrayType := range arrayTypes {
 				t.Run(arrayType.name, func(t *testing.T) {
+					limit := 0
+					switch arrayType.name {
+					case "random":
+						limit = test.randomLimit
+					case "digits":
+						limit = test.digitsLimit
+					case "sorted":
+						limit = test.sortedLimit
+					case "reverse":
+						limit = test.reverseLimit
+					}
 					runner := datatesting.NewRunner(
 						datatesting.WithWorkdir(fmt.Sprintf("./../../testdata/sortdata/%s/", arrayType.dir)),
-						datatesting.WithLimit(test.limit),
+						datatesting.WithLimit(limit),
 					)
 					runner.Run(t, Solver(test.sort))
 				})
@@ -106,36 +106,24 @@ func TestSort(t *testing.T) {
 		sort func(items []int) []int
 	}{
 		{
-			name: "bubble",
-			sort: basicsorts.Bubble[int],
+			name: "quick right",
+			sort: sort.QuickRight[int],
 		},
 		{
-			name: "bubble optimized",
-			sort: basicsorts.BubbleOptimized[int],
+			name: "quick middle",
+			sort: sort.QuickMiddle[int],
 		},
 		{
-			name: "insertion",
-			sort: basicsorts.Insertion[int],
+			name: "quick lomuto",
+			sort: sort.QuickLomuto[int],
 		},
 		{
-			name: "insertion shift",
-			sort: basicsorts.InsertionShift[int],
+			name: "merge",
+			sort: sort.Merge[int],
 		},
 		{
-			name: "insertion binary search",
-			sort: basicsorts.InsertionBinarySearch[int],
-		},
-		{
-			name: "shell",
-			sort: basicsorts.Shell[int],
-		},
-		{
-			name: "shell frank and lazarus",
-			sort: basicsorts.ShellFrankLazarus[int],
-		},
-		{
-			name: "shell insertion",
-			sort: basicsorts.ShellInsertion[int],
+			name: "merge with buffer",
+			sort: sort.MergeWithBuffer[int],
 		},
 	}
 	for _, test := range tests {
@@ -145,14 +133,7 @@ func TestSort(t *testing.T) {
 
 			got := test.sort(items)
 
-			if len(wantItems) != len(got) {
-				t.Fatalf("different length: want %d, got %d", len(wantItems), len(got))
-			}
-			for i := 0; i < len(wantItems); i++ {
-				if wantItems[i] != got[i] {
-					t.Errorf("different items at %d: want %d, got %d", i, wantItems[i], got[i])
-				}
-			}
+			datatesting.AssertEqualArrays(t, wantItems, got)
 		})
 	}
 }
