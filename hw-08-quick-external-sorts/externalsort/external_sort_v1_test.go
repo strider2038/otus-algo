@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/strider2038/otus-algo/hw-08-quick-external-sorts/externalsort"
 )
@@ -29,14 +30,14 @@ func TestSort(t *testing.T) {
 	}{
 		{numbersCount: 100, maxNumber: 10},
 		{numbersCount: 1_000, maxNumber: 10},
-		// {numbersCount: 10_000, maxNumber: 10},
-		// {numbersCount: 100_000, maxNumber: 10},
-		// {numbersCount: 1_000_000, maxNumber: 10},
-		// {numbersCount: 100, maxNumber: 100},
-		// {numbersCount: 1_000, maxNumber: 1_000},
-		// {numbersCount: 10_000, maxNumber: 10_000},
-		// {numbersCount: 100_000, maxNumber: 100_000},
-		// {numbersCount: 1_000_000, maxNumber: 1_000_000},
+		{numbersCount: 10_000, maxNumber: 10},
+		{numbersCount: 100_000, maxNumber: 10},
+		{numbersCount: 1_000_000, maxNumber: 10},
+		{numbersCount: 100, maxNumber: 100},
+		{numbersCount: 1_000, maxNumber: 1_000},
+		{numbersCount: 10_000, maxNumber: 10_000},
+		{numbersCount: 100_000, maxNumber: 100_000},
+		{numbersCount: 1_000_000, maxNumber: 1_000_000},
 	}
 	for _, test := range tests {
 		for _, params := range paramsList {
@@ -78,6 +79,8 @@ func GenerateRandomDataFile(n, t int, filename string) error {
 	}
 	defer file.Close()
 
+	rand.Seed(time.Now().UnixNano())
+
 	for i := 0; i < n; i++ {
 		number := strconv.Itoa(rand.Intn(t))
 		if _, err := io.WriteString(file, number+"\n"); err != nil {
@@ -95,16 +98,17 @@ func ReadNumbers(filename string) ([]int, error) {
 	}
 
 	lines := strings.Split(string(data), "\n")
-	numbers := make([]int, len(lines))
+	numbers := make([]int, 0, len(lines))
 
 	for i, line := range lines {
 		if line == "" {
 			continue
 		}
-		numbers[i], err = strconv.Atoi(line)
+		number, err := strconv.Atoi(line)
 		if err != nil {
 			return nil, fmt.Errorf("parse line %d: %w", i, err)
 		}
+		numbers = append(numbers, number)
 	}
 
 	return numbers, nil
