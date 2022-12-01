@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+// IntReader - вспомогательная структура для последовательного чтения целых чисел
+// из файла.
 type IntReader struct {
 	file    *os.File
 	scanner *bufio.Scanner
@@ -24,6 +26,9 @@ func ReadIntegersFromFile(filename string) (*IntReader, error) {
 	}, nil
 }
 
+// Next - сканирует следующую строку и возвращает число или ошибку.
+// Возвращает ErrEndOfList если достигли конца файла.
+// Возвращает ошибку парсинга, если не удалось прочитать число из файла.
 func (reader *IntReader) Next() (int, error) {
 	if !reader.scanner.Scan() {
 		return 0, ErrEndOfList

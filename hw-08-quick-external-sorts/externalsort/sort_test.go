@@ -20,14 +20,26 @@ const TestFile = "testdata/items.txt"
 func TestSort(t *testing.T) {
 	tests := []struct {
 		name string
-		sort func(filename string, chunkSize int) error
+		sort func(filename string, numbersCount int) error
 	}{
-		{name: "variant 1", sort: externalsort.SortFileV1},
+		{
+			name: "2-way merge",
+			sort: func(filename string, numbersCount int) error {
+				return externalsort.TwoWayMerge(filename, 100)
+			},
+		},
+		{
+			name: "k-way merge",
+			sort: func(filename string, numbersCount int) error {
+				return externalsort.KWayMerge(filename, 100)
+			},
+		},
 	}
 	paramsList := []struct {
 		numbersCount int
 		maxNumber    int
 	}{
+		{numbersCount: 0, maxNumber: 10},
 		{numbersCount: 100, maxNumber: 10},
 		{numbersCount: 1_000, maxNumber: 10},
 		{numbersCount: 10_000, maxNumber: 10},
@@ -53,13 +65,18 @@ func TestSort(t *testing.T) {
 					t.Fatal("generate file:", err)
 				}
 
-				if err := test.sort(TestFile, params.numbersCount/10); err != nil {
+				start := time.Now()
+				if err := test.sort(TestFile, params.numbersCount); err != nil {
 					t.Fatal("sort:", err)
 				}
+				t.Log("elapsed time:", time.Since(start).String())
 
 				items, err := ReadNumbers(TestFile)
 				if err != nil {
 					t.Fatal("read file:", err)
+				}
+				if params.numbersCount != len(items) {
+					t.Errorf("array length mismatch: want %d, got %d", params.numbersCount, len(items))
 				}
 				isSorted := sort.SliceIsSorted(items, func(i, j int) bool {
 					return items[i] < items[j]

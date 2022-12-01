@@ -4,12 +4,16 @@ import "errors"
 
 var ErrEndOfList = errors.New("end of list")
 
-type Heap struct {
+// MinHeap - куча с сортировкой от минимума. На вершине кучи - числа с минимальным размером.
+type MinHeap struct {
 	items []*HeapItem
 	size  int
 }
 
-func (heap *Heap) GetMin() (int, error) {
+// GetMin - возвращает следующее минимальное число из k.
+// Если все списки закончились, то возвращается ErrEndOfList.
+// Так же может возвращаться ошибка извлечения следующего элемента из списка.
+func (heap *MinHeap) GetMin() (int, error) {
 	// элементов больше нет - сортировка закончилась
 	if heap.size == 0 {
 		return 0, ErrEndOfList
@@ -26,7 +30,7 @@ func (heap *Heap) GetMin() (int, error) {
 		// уменьшаем размер кучи
 		heap.size--
 		// обновляем кучу
-		heap.normalize()
+		heap.sort()
 
 		return min, nil
 	}
@@ -38,18 +42,18 @@ func (heap *Heap) GetMin() (int, error) {
 	// подставляем значение
 	heap.items[0].value = nextValue
 	// обновляем кучу
-	heap.normalize()
+	heap.sort()
 
 	return min, nil
 }
 
-func (heap *Heap) normalize() {
+func (heap *MinHeap) sort() {
 	for h := heap.size/2 - 1; h >= 0; h-- {
 		heap.heapify(h)
 	}
 }
 
-func (heap *Heap) heapify(root int) {
+func (heap *MinHeap) heapify(root int) {
 	parent := root
 	left := 2*parent + 1
 	right := left + 1
@@ -66,23 +70,24 @@ func (heap *Heap) heapify(root int) {
 	heap.heapify(parent)
 }
 
-func (heap *Heap) swap(i, j int) {
+func (heap *MinHeap) swap(i, j int) {
 	heap.items[i], heap.items[j] = heap.items[j], heap.items[i]
 }
 
+// HeapItem - элемент кучи.
 type HeapItem struct {
 	// Текущее значение (прочитанное из файла)
 	value int
-	// Абстракция списка для чтения следующего значения
-	next List
+	next  List
 }
 
+// List - абстракция списка для чтения следующего значения.
 type List interface {
 	Next() (int, error)
 }
 
-func NewHeapFromReaders(readers ...*IntReader) (*Heap, error) {
-	heap := &Heap{items: make([]*HeapItem, len(readers))}
+func NewMinHeapFromReaders(readers ...*IntReader) (*MinHeap, error) {
+	heap := &MinHeap{items: make([]*HeapItem, len(readers))}
 
 	for _, reader := range readers {
 		value, err := reader.Next()
@@ -98,7 +103,7 @@ func NewHeapFromReaders(readers ...*IntReader) (*Heap, error) {
 		heap.size++
 	}
 
-	heap.normalize()
+	heap.sort()
 
 	return heap, nil
 }
