@@ -36,14 +36,6 @@ func (tree *Tree[V]) ForEach(f func(value V) error) error {
 	return tree.root.forEach(f)
 }
 
-// Методы к реализации:
-// smallLeftRotation(Tree t) smallRightRotation(Tree t) - малое левое/правое вращение
-// bigLeftRotation(Tree t), bigRightRotation(Tree t) - большое левое/правое вращение, написать через вызов малых вращений
-// (при желании выполнить оптимизацию: переписать через прямые присваивания и проверить эффективность)
-// void insert(int x) - вставка элемента
-// void remove(int x) - удаление элемента
-// void rebalance(Tree t) - перебалансировка дерева
-
 type Node[V Value] struct {
 	Value  V
 	height int
