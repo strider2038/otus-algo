@@ -1,4 +1,4 @@
-package chainmap
+package openmap
 
 import (
 	"crypto/sha256"
@@ -18,7 +18,6 @@ type Map[V any] struct {
 type Item[V any] struct {
 	key   string
 	value V
-	next  *Item[V]
 }
 
 func (m *Map[V]) Get(key string) V {
@@ -28,15 +27,19 @@ func (m *Map[V]) Get(key string) V {
 }
 
 func (m *Map[V]) Find(key string) (V, bool) {
+	var zero V
 	index := m.getIndex(key)
 
-	for item := m.items[index]; item != nil; item = item.next {
-		if item.key == key {
-			return item.value, true
+	size := uint64(len(m.items))
+	for i := uint64(0); i < size; i++ {
+		offset := (index + i) % size
+		if m.items[offset] == nil {
+			return zero, false
+		}
+		if m.items[offset].key == key {
+			return m.items[offset].value, true
 		}
 	}
-
-	var zero V
 
 	return zero, false
 }
@@ -51,26 +54,7 @@ func (m *Map[V]) Put(key string, value V) {
 
 func (m *Map[V]) Delete(key string) {
 	index := m.getIndex(key)
-
-	if m.items[index] == nil {
-		return
-	}
-
-	if m.items[index].key == key {
-		m.items[index] = m.items[index].next
-		m.count--
-
-		return
-	}
-
-	for item := m.items[index]; item.next != nil; item = item.next {
-		if item.next.key == key {
-			item.next = item.next.next
-			m.count--
-
-			return
-		}
-	}
+	_ = index
 }
 
 func (m *Map[V]) Count() int {
@@ -91,8 +75,8 @@ func (m *Map[V]) rehash() {
 	items := m.items
 	m.items = make([]*Item[V], 2*len(m.items))
 	for i := 0; i < len(items); i++ {
-		for item := items[i]; item != nil; item = item.next {
-			m.put(item.key, item.value)
+		if items[i] != nil {
+			m.put(items[i].key, items[i].value)
 		}
 	}
 }
@@ -100,21 +84,21 @@ func (m *Map[V]) rehash() {
 func (m *Map[V]) put(key string, value V) bool {
 	index := m.getIndex(key)
 
-	for item := m.items[index]; item != nil; item = item.next {
-		if item.key == key {
-			item.value = value
-
+	size := uint64(len(m.items))
+	for i := uint64(0); i < size; i++ {
+		offset := (index + i) % size
+		if m.items[offset] == nil {
+			m.items[offset] = &Item[V]{key: key, value: value}
+			return true
+		}
+		if m.items[offset].key == key {
+			m.items[offset].value = value
 			return false
 		}
 	}
 
-	m.items[index] = &Item[V]{
-		key:   key,
-		value: value,
-		next:  m.items[index],
-	}
-
-	return true
+	// недостижимое состояние при корректной работе карты
+	panic("map items overflow")
 }
 
 func (m *Map[V]) getIndex(key string) uint64 {
