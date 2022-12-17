@@ -28,9 +28,9 @@ func (m *Map[V]) Get(key string) V {
 }
 
 func (m *Map[V]) Find(key string) (V, bool) {
-	bucketNo := m.getBucketNo(key)
+	index := m.getIndex(key)
 
-	for item := m.items[bucketNo]; item != nil; item = item.next {
+	for item := m.items[index]; item != nil; item = item.next {
 		if item.key == key {
 			return item.value, true
 		}
@@ -50,20 +50,20 @@ func (m *Map[V]) Put(key string, value V) {
 }
 
 func (m *Map[V]) Delete(key string) {
-	bucketNo := m.getBucketNo(key)
+	index := m.getIndex(key)
 
-	if m.items[bucketNo] == nil {
+	if m.items[index] == nil {
 		return
 	}
 
-	if m.items[bucketNo].key == key {
-		m.items[bucketNo] = m.items[bucketNo].next
+	if m.items[index].key == key {
+		m.items[index] = m.items[index].next
 		m.count--
 
 		return
 	}
 
-	for item := m.items[bucketNo]; item.next != nil; item = item.next {
+	for item := m.items[index]; item.next != nil; item = item.next {
 		if item.next.key == key {
 			item.next = item.next.next
 			m.count--
@@ -98,9 +98,9 @@ func (m *Map[V]) rehash() {
 }
 
 func (m *Map[V]) put(key string, value V) bool {
-	bucketNo := m.getBucketNo(key)
+	index := m.getIndex(key)
 
-	for item := m.items[bucketNo]; item != nil; item = item.next {
+	for item := m.items[index]; item != nil; item = item.next {
 		if item.key == key {
 			item.value = value
 
@@ -108,16 +108,16 @@ func (m *Map[V]) put(key string, value V) bool {
 		}
 	}
 
-	m.items[bucketNo] = &Item[V]{
+	m.items[index] = &Item[V]{
 		key:   key,
 		value: value,
-		next:  m.items[bucketNo],
+		next:  m.items[index],
 	}
 
 	return true
 }
 
-func (m *Map[V]) getBucketNo(key string) uint64 {
+func (m *Map[V]) getIndex(key string) uint64 {
 	return hash(key) % uint64(len(m.items))
 }
 
