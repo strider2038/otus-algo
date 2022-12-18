@@ -2,7 +2,6 @@ package openmap_test
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -32,21 +31,43 @@ func TestMapBasic(t *testing.T) {
 	}
 }
 
+func TestMapCollisions(t *testing.T) {
+	m := openmap.Map[int]{}
+
+	m.Put("PZD3n7 Aep", 1)
+	m.Put("4TAvA5wK4f", 2)
+	m.Put("tw0LcVjr v", 3)
+	m.Put("VjpdKEZgoX", 4)
+	m.Delete("4TAvA5wK4f")
+	m.Put("FQ5rNDbYmd", 5)
+	m.Delete("FQ5rNDbYmd")
+
+	m.Get("FQ5rNDbYmd")
+}
+
 func TestMapRehash(t *testing.T) {
 	m := openmap.Map[int]{}
 	stdmap := map[string]int{}
 
-	ss := GenerateRandomStrings(10000)
+	ss := datatesting.GenerateRandomStrings(10000)
 	for i, s := range ss {
 		m.Put(s, i)
 		stdmap[s] = i
+	}
+	for i := 0; i < len(ss); i += 2 {
+		m.Delete(ss[i])
+		delete(stdmap, ss[i])
+	}
+	for i, s := range ss {
+		m.Put(s, len(ss)+i)
+		stdmap[s] = len(ss) + i
 	}
 
 	if len(stdmap) != m.Count() {
 		t.Errorf("unexpected map count: want %d, got %d", len(stdmap), m.Count())
 	}
 	for i, s := range ss {
-		datatesting.AssertEqual(t, i, m.Get(s))
+		datatesting.AssertEqual(t, len(ss)+i, m.Get(s))
 	}
 }
 
@@ -55,7 +76,7 @@ func TestMap_Put(t *testing.T) {
 
 	for _, count := range counts {
 		t.Run(fmt.Sprintf("%d", count), func(t *testing.T) {
-			ss := GenerateRandomStrings(count)
+			ss := datatesting.GenerateRandomStrings(count)
 
 			start := time.Now()
 			m := openmap.Map[int]{}
@@ -65,25 +86,4 @@ func TestMap_Put(t *testing.T) {
 			t.Log("elapsed time:", time.Since(start).String())
 		})
 	}
-}
-
-var chars = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789")
-
-func GenerateRandomString(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
-	}
-	return string(b)
-}
-
-func GenerateRandomStrings(n int) []string {
-	rand.Seed(time.Now().UnixNano())
-
-	ss := make([]string, n)
-	for i := 0; i < n; i++ {
-		ss[i] = GenerateRandomString(15)
-	}
-
-	return ss
 }

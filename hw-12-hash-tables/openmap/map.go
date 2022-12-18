@@ -31,15 +31,17 @@ func (m *Map[V]) Find(key string) (V, bool) {
 	var zero V
 	index := m.getIndex(key)
 
-	size := uint64(len(m.items))
-	for i := uint64(0); i < size; i++ {
-		offset := (index + i) % size
+	for i := uint64(0); i < uint64(len(m.items)); i++ {
+		offset := m.probe(index, i)
+		// если пусто, то элемента не существует
 		if m.items[offset] == nil {
 			return zero, false
 		}
+		// удаленные элементы пропускаем
 		if m.items[offset].isTrashed {
 			continue
 		}
+		// совпадение ключа - элемент найден
 		if m.items[offset].key == key {
 			return m.items[offset].value, true
 		}
@@ -59,17 +61,26 @@ func (m *Map[V]) Put(key string, value V) {
 func (m *Map[V]) Delete(key string) {
 	index := m.getIndex(key)
 
-	size := uint64(len(m.items))
-	for i := uint64(0); i < size; i++ {
-		offset := (index + i) % size
+	for i := uint64(0); i < uint64(len(m.items)); i++ {
+		offset := m.probe(index, i)
+		// если пусто, то элемента не существует
 		if m.items[offset] == nil {
 			break
 		}
+
+		// удаленные элементы пропускаем
 		if m.items[offset].isTrashed {
 			continue
 		}
+
 		if m.items[offset].key == key {
-			m.items[offset].isTrashed = true
+			// если следующий элемент пуст, то физически удаляем элемент
+			if m.items[m.probe(index, i+1)] == nil {
+				m.items[offset] = nil
+			} else {
+				// иначе отмечаем элемент как удаленный
+				m.items[offset].isTrashed = true
+			}
 			m.count--
 			break
 		}
@@ -94,7 +105,8 @@ func (m *Map[V]) rehash() {
 	items := m.items
 	m.items = make([]*Item[V], 2*len(m.items))
 	for i := 0; i < len(items); i++ {
-		if items[i] != nil {
+		// перезаписываем новую карту только существующие элементы
+		if items[i] != nil && !items[i].isTrashed {
 			m.put(items[i].key, items[i].value)
 		}
 	}
@@ -103,13 +115,16 @@ func (m *Map[V]) rehash() {
 func (m *Map[V]) put(key string, value V) bool {
 	index := m.getIndex(key)
 
-	size := uint64(len(m.items))
-	for i := uint64(0); i < size; i++ {
-		offset := (index + i) % size
+	for i := uint64(0); i < uint64(len(m.items)); i++ {
+		offset := m.probe(index, i)
+		// если пусто, то записываем новый элемент
 		if m.items[offset] == nil {
 			m.items[offset] = &Item[V]{key: key, value: value}
 			return true
 		}
+
+		// если помечен как удаленный, то перезаписываем при совпадении
+		// ключей или идем дальше
 		if m.items[offset].isTrashed {
 			if m.items[offset].key == key {
 				m.items[offset].isTrashed = false
@@ -119,6 +134,8 @@ func (m *Map[V]) put(key string, value V) bool {
 			}
 			continue
 		}
+
+		// при совпадении ключей просто обновляем значение
 		if m.items[offset].key == key {
 			m.items[offset].value = value
 			return false
@@ -131,6 +148,10 @@ func (m *Map[V]) put(key string, value V) bool {
 
 func (m *Map[V]) getIndex(key string) uint64 {
 	return hash(key) % uint64(len(m.items))
+}
+
+func (m *Map[V]) probe(index uint64, offset uint64) uint64 {
+	return (index + offset) % uint64(len(m.items))
 }
 
 func hash(s string) uint64 {
