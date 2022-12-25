@@ -126,6 +126,18 @@ func CountBySieveOfEratosthenesOptimized(n int) int {
 		return 0
 	}
 
+	return findBySieveOfEratosthenesOptimized(n).Count()
+}
+
+func FindBySieveOfEratosthenesOptimized(n int) []int {
+	if n <= 1 {
+		return nil
+	}
+
+	return findBySieveOfEratosthenesOptimized(n).Numbers()
+}
+
+func findBySieveOfEratosthenesOptimized(n int) BitSieve {
 	primes := NewBitSieve(n)
 
 	for i := 2; i*i <= n; i++ {
@@ -136,7 +148,7 @@ func CountBySieveOfEratosthenesOptimized(n int) int {
 		}
 	}
 
-	return primes.Count()
+	return primes
 }
 
 type BoolSieve []bool
@@ -226,4 +238,19 @@ func (s BitSieve) Count() int {
 	}
 
 	return count
+}
+
+func (s BitSieve) Numbers() []int {
+	count := s.Count()
+	numbers := make([]int, count)
+
+	i := 0
+	for n := 0; n < len(s)*64 && i < count; n++ {
+		if s.IsSet(n) {
+			numbers[i] = n
+			i++
+		}
+	}
+
+	return numbers
 }
