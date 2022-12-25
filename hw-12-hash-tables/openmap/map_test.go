@@ -66,8 +66,8 @@ func TestMapRehash(t *testing.T) {
 	if len(stdmap) != m.Count() {
 		t.Errorf("unexpected map count: want %d, got %d", len(stdmap), m.Count())
 	}
-	for i, s := range ss {
-		datatesting.AssertEqual(t, len(ss)+i, m.Get(s))
+	for key, value := range stdmap {
+		datatesting.AssertEqual(t, value, m.Get(key))
 	}
 }
 
@@ -84,6 +84,28 @@ func TestMap_Put(t *testing.T) {
 				m.Put(s, i)
 			}
 			t.Log("elapsed time:", time.Since(start).String())
+		})
+	}
+}
+
+func TestMap_Get(t *testing.T) {
+	counts := []int{1000, 10_000, 100_000, 1_000_000}
+
+	for _, count := range counts {
+		t.Run(fmt.Sprintf("%d", count), func(t *testing.T) {
+			ss := datatesting.GenerateRandomStrings(count)
+			m := openmap.Map[int]{}
+			for i, s := range ss {
+				m.Put(s, i)
+			}
+
+			var sum time.Duration
+			for _, s := range ss {
+				start := time.Now()
+				m.Get(s)
+				sum += time.Since(start)
+			}
+			t.Log("average time:", (sum / time.Duration(len(ss))).String())
 		})
 	}
 }
