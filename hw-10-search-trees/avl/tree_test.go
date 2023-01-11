@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/hw-08-quick-external-sorts/sort"
+	"github.com/strider2038/otus-algo/hw-06-basic-sorts/basicsorts"
 	"github.com/strider2038/otus-algo/hw-10-search-trees/avl"
 )
 
@@ -135,7 +135,7 @@ func TestTree(t *testing.T) {
 				t.Log("elapsed time:", time.Since(start).String())
 			})
 
-			numbers = sort.QuickMiddle(numbers)
+			numbers = basicsorts.Shell(numbers)
 			t.Run(fmt.Sprintf("%s, n=%d, sorted", operation.name, count), func(t *testing.T) {
 				tree := createTreeFromNumbers(numbers)
 
