@@ -14,6 +14,20 @@ func AssertEqual[T comparable](t *testing.T, want, got T) {
 	}
 }
 
+func AssertTrue(t *testing.T, isTrue bool) {
+	t.Helper()
+	if !isTrue {
+		t.Errorf("test failed: want true, got false")
+	}
+}
+
+func AssertFalse(t *testing.T, isTrue bool) {
+	t.Helper()
+	if isTrue {
+		t.Errorf("test failed: want false, got true")
+	}
+}
+
 func AssertEqualArrays(t *testing.T, wantItems []int, got []int) {
 	t.Helper()
 
