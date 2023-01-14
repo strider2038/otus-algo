@@ -7,7 +7,8 @@ type Trie struct {
 }
 
 type Node struct {
-	children [alphabetSize]*Node
+	// todo: use pointer
+	children *[alphabetSize]*Node
 	isEnd    bool
 }
 
@@ -22,6 +23,9 @@ func (t *Trie) Insert(word string) {
 		index := char - 'a'
 		if index < 0 || index >= alphabetSize {
 			panic("index out of range")
+		}
+		if node.children == nil {
+			node.children = &[alphabetSize]*Node{}
 		}
 		if node.children[index] == nil {
 			node.children[index] = &Node{}
@@ -40,7 +44,7 @@ func (t *Trie) Search(word string) bool {
 		if index < 0 || index >= alphabetSize {
 			panic("index out of range")
 		}
-		if node.children[index] == nil {
+		if node.children == nil || node.children[index] == nil {
 			return false
 		}
 		node = node.children[index]
@@ -57,7 +61,7 @@ func (t *Trie) StartsWith(prefix string) bool {
 		if index < 0 || index >= alphabetSize {
 			panic("index out of range")
 		}
-		if node.children[index] == nil {
+		if node.children == nil || node.children[index] == nil {
 			return false
 		}
 		node = node.children[index]

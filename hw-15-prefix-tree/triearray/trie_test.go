@@ -31,6 +31,7 @@ func TestTrieArrayBasic(t *testing.T) {
 	items.Put("delta", 4)
 	items.Put("beta", 5)
 	items.Delete("delta")
+	items.Delete("delta")
 
 	datatesting.AssertEqual(t, 3, items.Count())
 	datatesting.AssertEqual(t, 1, items.Get("alpha"))
@@ -55,6 +56,8 @@ func TestTrieArray_Put(t *testing.T) {
 				m.Put(s, i)
 			}
 			t.Log("elapsed time:", time.Since(start).String())
+			t.Log("mem size (KB):", m.MemSize()/1024)
+			t.Log("mem size (MB):", m.MemSize()/1024/1024)
 		})
 	}
 }
@@ -94,6 +97,8 @@ func TestMap_Put(t *testing.T) {
 				m.Put(s, i)
 			}
 			t.Log("elapsed time:", time.Since(start).String())
+			t.Log("mem size (KB):", m.MemSize()/1024)
+			t.Log("mem size (MB):", m.MemSize()/1024/1024)
 		})
 	}
 }
@@ -113,6 +118,45 @@ func TestMap_Get(t *testing.T) {
 			for _, s := range ss {
 				start := time.Now()
 				m.Get(s)
+				sum += time.Since(start)
+			}
+			t.Log("average time:", (sum / time.Duration(len(ss))).String())
+		})
+	}
+}
+
+func TestStandardMap_Put(t *testing.T) {
+	counts := []int{100, 1000, 10_000, 100_000, 1_000_000}
+
+	for _, count := range counts {
+		t.Run(fmt.Sprintf("%d", count), func(t *testing.T) {
+			ss := datatesting.GenerateRandomStrings(count)
+
+			start := time.Now()
+			m := map[string]int{}
+			for i, s := range ss {
+				m[s] = i
+			}
+			t.Log("elapsed time:", time.Since(start).String())
+		})
+	}
+}
+
+func TestStandardMap_Get(t *testing.T) {
+	counts := []int{100, 1000, 10_000, 100_000, 1_000_000}
+
+	for _, count := range counts {
+		t.Run(fmt.Sprintf("%d", count), func(t *testing.T) {
+			ss := datatesting.GenerateRandomStrings(count)
+			m := map[string]int{}
+			for i, s := range ss {
+				m[s] = i
+			}
+
+			var sum time.Duration
+			for _, s := range ss {
+				start := time.Now()
+				_ = m[s]
 				sum += time.Since(start)
 			}
 			t.Log("average time:", (sum / time.Duration(len(ss))).String())

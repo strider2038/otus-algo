@@ -21,6 +21,14 @@ type Item[V any] struct {
 	next  *Item[V]
 }
 
+func (item *Item[V]) memSize() int {
+	if item == nil {
+		return 8 /* self pointer */
+	}
+
+	return 8 + len(item.key) + item.next.memSize()
+}
+
 func (m *Map[V]) Get(key string) V {
 	v, _ := m.Find(key)
 
@@ -75,6 +83,16 @@ func (m *Map[V]) Delete(key string) {
 
 func (m *Map[V]) Count() int {
 	return m.count
+}
+
+func (m *Map[V]) MemSize() int {
+	size := 8 /* count */ + 8 /* items pointer */
+
+	for _, item := range m.items {
+		size += item.memSize()
+	}
+
+	return size
 }
 
 func (m *Map[V]) rehash() {
