@@ -1,5 +1,7 @@
 package graph
 
+import "github.com/strider2038/otus-algo/pkg/structs"
+
 type Vector []int
 
 type AdjacencyMatrix []Vector
@@ -26,8 +28,8 @@ func (graph AdjacencyMatrix) Inverse() AdjacencyMatrix {
 // PathExistsDFS - проверяет существование пути в графе из вершины from в
 // вершину to с помощью поиска в глубину.
 func (graph AdjacencyMatrix) PathExistsDFS(from, to int) bool {
-	visited := NewBitSet(len(graph))
-	stack := Stack[int]{}
+	visited := structs.NewBitSet(len(graph))
+	stack := structs.Stack[int]{}
 	stack.Push(from)
 
 	for {
@@ -56,8 +58,8 @@ func (graph AdjacencyMatrix) PathExistsDFS(from, to int) bool {
 // WalkDFS - обходит вершины графа начиная с вершины vertex с помощью поиска
 // в глубину и вызывает для каждой callback-функцию.
 func (graph AdjacencyMatrix) WalkDFS(vertex int, f func(vertex int)) {
-	visited := NewBitSet(len(graph))
-	stack := Stack[int]{}
+	visited := structs.NewBitSet(len(graph))
+	stack := structs.Stack[int]{}
 	stack.Push(vertex)
 
 	for {
@@ -83,8 +85,8 @@ type componentsSeeker struct {
 	graph    AdjacencyMatrix
 	inverted AdjacencyMatrix
 
-	stack      Stack[int]
-	visited    BitSet
+	stack      structs.Stack[int]
+	visited    structs.BitSet
 	components [][]int
 }
 
@@ -92,7 +94,7 @@ func newComponentsSeeker(graph AdjacencyMatrix) *componentsSeeker {
 	return &componentsSeeker{
 		graph:      graph,
 		inverted:   graph.Inverse(),
-		visited:    NewBitSet(len(graph)),
+		visited:    structs.NewBitSet(len(graph)),
 		components: make([][]int, 0),
 	}
 }
@@ -107,7 +109,7 @@ func (s *componentsSeeker) Find() [][]int {
 	}
 
 	componentIndex := 0
-	s.visited = NewBitSet(len(s.graph))
+	s.visited = structs.NewBitSet(len(s.graph))
 	for {
 		u, ok := s.stack.Pop()
 		if !ok {

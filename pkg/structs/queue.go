@@ -1,18 +1,14 @@
-package graph
+package structs
 
 type Queue[T any] struct {
-	front *QueueItem[T]
-	back  *QueueItem[T]
+	front *queueItem[T]
+	back  *queueItem[T]
 	size  int
 }
 
-type QueueItem[T any] struct {
-	previous *QueueItem[T]
+type queueItem[T any] struct {
+	previous *queueItem[T]
 	value    T
-}
-
-func NewQueue[T any]() *Queue[T] {
-	return &Queue[T]{}
 }
 
 func (queue *Queue[T]) Size() int {
@@ -20,7 +16,7 @@ func (queue *Queue[T]) Size() int {
 }
 
 func (queue *Queue[T]) Enqueue(value T) {
-	item := &QueueItem[T]{value: value}
+	item := &queueItem[T]{value: value}
 
 	if queue.size == 0 {
 		queue.front = item

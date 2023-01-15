@@ -1,12 +1,12 @@
-package graph
+package structs
 
 type Stack[T any] struct {
-	top *StackItem[T]
+	top *stackItem[T]
 }
 
-type StackItem[T any] struct {
+type stackItem[T any] struct {
 	value T
-	next  *StackItem[T]
+	next  *stackItem[T]
 }
 
 func (s *Stack[T]) IsEmpty() bool {
@@ -14,7 +14,7 @@ func (s *Stack[T]) IsEmpty() bool {
 }
 
 func (s *Stack[T]) Push(value T) {
-	s.top = &StackItem[T]{value: value, next: s.top}
+	s.top = &stackItem[T]{value: value, next: s.top}
 }
 
 func (s *Stack[T]) Pop() (T, bool) {

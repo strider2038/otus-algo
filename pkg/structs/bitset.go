@@ -1,4 +1,4 @@
-package graph
+package structs
 
 import "math/bits"
 

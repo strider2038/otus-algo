@@ -1,14 +1,14 @@
-package graph_test
+package structs_test
 
 import (
 	"testing"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/hw-13-graph-kosaraju/graph"
+	"github.com/strider2038/otus-algo/pkg/structs"
 )
 
 func TestBitSet_IsSet(t *testing.T) {
-	bits := graph.NewBitSet(100)
+	bits := structs.NewBitSet(100)
 
 	bits.Set(0)
 	bits.Set(2)
@@ -26,7 +26,7 @@ func TestBitSet_IsSet(t *testing.T) {
 }
 
 func TestBitSet_OnesCount(t *testing.T) {
-	bits := graph.NewBitSet(100)
+	bits := structs.NewBitSet(100)
 	bits.Set(0)
 	bits.Set(2)
 	bits.Set(63)
