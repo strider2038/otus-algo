@@ -7,7 +7,7 @@ type Sortable interface {
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
 }
 
-func swap[T Sortable](items []T, i, j int) {
+func swap[T any](items []T, i, j int) {
 	t := items[i]
 	items[i] = items[j]
 	items[j] = t
