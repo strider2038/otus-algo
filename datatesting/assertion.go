@@ -28,7 +28,7 @@ func AssertFalse(t *testing.T, isTrue bool) {
 	}
 }
 
-func AssertEqualArrays(t *testing.T, wantItems []int, got []int) {
+func AssertEqualArrays[T comparable](t *testing.T, wantItems []T, got []T) {
 	t.Helper()
 
 	if len(wantItems) != len(got) {
@@ -40,7 +40,7 @@ func AssertEqualArrays(t *testing.T, wantItems []int, got []int) {
 
 	for i := 0; i < len(wantItems); i++ {
 		if wantItems[i] != got[i] {
-			t.Errorf("different items at %d: want %d, got %d", i, wantItems[i], got[i])
+			t.Errorf("different items at %d: want %v, got %v", i, wantItems[i], got[i])
 			errsCount++
 			if errsCount > 100 {
 				t.Errorf("too much errors")
