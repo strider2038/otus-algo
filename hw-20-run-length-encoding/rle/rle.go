@@ -1,6 +1,6 @@
 package rle
 
-func Compress(input []byte) []byte {
+func CompressBytes(input []byte) []byte {
 	if len(input) == 0 {
 		return input
 	}
@@ -24,7 +24,7 @@ func Compress(input []byte) []byte {
 	return output
 }
 
-func Decompress(input []byte) []byte {
+func DecompressBytes(input []byte) []byte {
 	if len(input) == 0 {
 		return input
 	}

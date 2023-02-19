@@ -1,82 +1,70 @@
 package rle2
 
-func Compress(input []byte) []byte {
-	if len(input) == 0 {
-		return input
+func CompressBytes(in []byte) []byte {
+	if len(in) == 0 {
+		return in
 	}
+	out := make([]byte, 0, len(in))
 
-	output := make([]byte, 0, len(input))
+	for i := 0; i < len(in); {
+		sameCount := 1
+		for j := i + 1; j < len(in) && in[i] == in[j] && sameCount < 127; j++ {
+			sameCount++
+		}
+		if sameCount > 1 {
+			out = append(out, byte(sameCount), in[i])
+			i += sameCount
 
-	cursor := input[0]
-	count := byte(1)
-	isSame := true
-	for i := 1; i < len(input); i++ {
-		if isSame {
-			if cursor == input[i] && count < 127 {
-				count++
-			} else if count > 1 {
-				output = append(output, count, cursor)
-				count = 1
-			} else {
-				count++
-				isSame = false
+			continue
+		}
+
+		diffCount := 1
+		for j := i; j < len(in)-1 && in[j] != in[j+1] && diffCount < 128; j++ {
+			if j < len(in)-2 && in[j+1] == in[j+2] {
+				break
 			}
+			diffCount++
+		}
+		if diffCount == 1 {
+			out = append(out, 1, in[i])
 		} else {
-			if cursor != input[i] && (i == len(input)-1 || i < len(input)-1 && input[i] != input[i+1]) && count < 128 {
-				count++
-			} else if count > 1 {
-				output = append(output, byte(-int8(count)))
-				for j := i - int(count); j < i; j++ {
-					output = append(output, input[j])
-				}
-				count = 1
-			} else {
-				count++
-				isSame = true
+			out = append(out, byte(-int8(diffCount)))
+			for j := i; j < i+diffCount; j++ {
+				out = append(out, in[j])
 			}
 		}
 
-		cursor = input[i]
+		i += diffCount
 	}
 
-	if isSame {
-		output = append(output, count, cursor)
-	} else {
-		output = append(output, byte(-int8(count)))
-		for j := len(input) - int(count); j < len(input); j++ {
-			output = append(output, input[j])
-		}
-	}
-
-	return output
+	return out
 }
 
-func Decompress(input []byte) []byte {
-	if len(input) == 0 {
-		return input
+func DecompressBytes(in []byte) []byte {
+	if len(in) == 0 {
+		return in
 	}
-	if len(input) < 2 {
+	if len(in) < 2 {
 		panic("unexpected length of input")
 	}
 
-	output := make([]byte, 0, len(input))
-	i := 0
-	for i < len(input)-1 {
-		count := input[i]
-		cursor := input[i+1]
+	out := make([]byte, 0, len(in))
+	for i := 0; i < len(in)-1; {
+		count := in[i]
+		cursor := in[i+1]
 		if count <= 127 {
 			for j := 0; j < int(count); j++ {
-				output = append(output, cursor)
+				out = append(out, cursor)
 			}
 			i += 2
 		} else {
 			i++
 			for j := 0; j < int(byte(-int8(count))); j++ {
-				output = append(output, input[i])
+				out = append(out, in[i])
 				i++
 			}
 		}
 	}
 
-	return output
+	return out
 }

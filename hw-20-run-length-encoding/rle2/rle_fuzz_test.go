@@ -10,8 +10,8 @@ import (
 func FuzzCompress(f *testing.F) {
 	f.Add([]byte{1})
 	f.Fuzz(func(t *testing.T, raw []byte) {
-		compressed := rle2.Compress(raw)
-		decompressed := rle2.Decompress(compressed)
+		compressed := rle2.CompressBytes(raw)
+		decompressed := rle2.DecompressBytes(compressed)
 		datatesting.AssertEqualArrays(t, raw, decompressed)
 	})
 }

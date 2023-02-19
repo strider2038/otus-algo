@@ -39,12 +39,37 @@ var cases = []struct {
 	},
 }
 
+func TestCompressBytes(t *testing.T) {
+	for i, test := range cases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			compressed := rle.CompressBytes(test.decompressed)
+
+			datatesting.AssertEqualArrays(t, test.compressed, compressed)
+		})
+	}
+}
+
+func TestDecompressBytes(t *testing.T) {
+	for i, test := range cases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			decompressed := rle.DecompressBytes(test.compressed)
+
+			datatesting.AssertEqualArrays(t, test.decompressed, decompressed)
+		})
+	}
+}
+
 func TestCompress(t *testing.T) {
 	for i, test := range cases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			compressed := rle.Compress(test.decompressed)
+			compressed := bytes.Buffer{}
 
-			datatesting.AssertEqualArrays(t, test.compressed, compressed)
+			err := rle.Compress(bytes.NewReader(test.decompressed), &compressed)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			datatesting.AssertEqualArrays(t, test.compressed, compressed.Bytes())
 		})
 	}
 }
@@ -52,9 +77,14 @@ func TestCompress(t *testing.T) {
 func TestDecompress(t *testing.T) {
 	for i, test := range cases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			decompressed := rle.Decompress(test.compressed)
+			decompressed := bytes.Buffer{}
 
-			datatesting.AssertEqualArrays(t, test.decompressed, decompressed)
+			err := rle.Decompress(bytes.NewReader(test.compressed), &decompressed)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			datatesting.AssertEqualArrays(t, test.decompressed, decompressed.Bytes())
 		})
 	}
 }
