@@ -66,7 +66,7 @@ func Execute(command, inputFilename, outputFilename string) error {
 		return err
 	}
 
-	fmt.Printf("file '%s' %sed into '%s'", inputFilename, command, outputFilename)
+	fmt.Printf("file '%s' %sed into '%s'\n", inputFilename, command, outputFilename)
 
 	return nil
 }
