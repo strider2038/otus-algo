@@ -12,8 +12,7 @@ const usageDescription = `RLE compressor.
 
 Usage:
 rle compress <input filename> <output filename> - to compress input filename and save it to output;
-rle decompress <input filename> <output filename> - to decompress input filename and save it to output.
-`
+rle decompress <input filename> <output filename> - to decompress input filename and save it to output.`
 
 func main() {
 	if len(os.Args) <= 1 || os.Args[1] == "help" {
