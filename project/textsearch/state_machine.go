@@ -7,6 +7,11 @@ const (
 	finalState   = "<"
 )
 
+type result struct {
+	value   strings.Builder
+	subType StandardType
+}
+
 type state struct {
 	transitions []stateTransition
 	isFinal     bool
@@ -15,6 +20,7 @@ type state struct {
 type stateTransition struct {
 	condition     matcher
 	target        *state
+	modifyResult  func(result *result)
 	isCharIgnored bool // символ не добавляется в результат при этом переходе
 	replacement   rune // символ для замены
 }
@@ -24,12 +30,12 @@ type stateMachine struct {
 	root        *state
 
 	current *state
-	keyword strings.Builder
+	result  result
 }
 
 func (m *stateMachine) Reset() {
 	m.current = nil
-	m.keyword = strings.Builder{}
+	m.result = result{}
 }
 
 func (m *stateMachine) Handle(char rune) bool {
@@ -68,18 +74,25 @@ func (m *stateMachine) IsFinished() bool {
 }
 
 func (m *stateMachine) Get() []Keyword {
-	return []Keyword{{Value: m.keyword.String(), Type: m.keywordType}}
+	return []Keyword{{
+		Value:        m.result.value.String(),
+		Type:         m.keywordType,
+		StandardType: m.result.subType,
+	}}
 }
 
 func (m *stateMachine) handleTransition(char rune, transition stateTransition) {
 	m.current = transition.target
+	if transition.modifyResult != nil {
+		transition.modifyResult(&m.result)
+	}
 	if char == 0 || transition.isCharIgnored {
 		return
 	}
 	if transition.replacement > 0 {
-		m.keyword.WriteRune(transition.replacement)
+		m.result.value.WriteRune(transition.replacement)
 	} else {
-		m.keyword.WriteRune(char)
+		m.result.value.WriteRune(char)
 	}
 }
 
@@ -105,6 +118,7 @@ func newStateMachine(p pattern) *stateMachine {
 			transitions[j].condition = transition.condition
 			transitions[j].isCharIgnored = transition.isCharIgnored
 			transitions[j].replacement = transition.replacement
+			transitions[j].modifyResult = transition.modifyResult
 			transitions[j].target = &states[indices[transition.target]]
 		}
 

@@ -12,12 +12,16 @@ type pattern struct {
 }
 
 type patternNode struct {
+	// todo: unpack ?
 	transitions []patternTransition
 }
 
 type patternTransition struct {
-	condition     matcher
-	target        string
+	condition    matcher
+	target       string
+	modifyResult func(result *result)
+
+	// todo: не нужно, если делать предобработку строки
 	isCharIgnored bool // символ не добавляется в результат при этом переходе
 	replacement   rune // символ для замены
 }
@@ -68,4 +72,10 @@ func (oneOf oneOf) Matches(c rune) bool {
 	}
 
 	return false
+}
+
+func setStandardType(t StandardType) func(r *result) {
+	return func(r *result) {
+		r.subType = t
+	}
 }

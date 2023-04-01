@@ -11,7 +11,21 @@ const (
 	AccuracyClassCode                        // блок обозначения класса точности (например, "класс точности A")
 )
 
+// StandardType - типы обозначений стандартов
+type StandardType int
+
+const (
+	GOST     StandardType = iota + 1 // ГОСТ xxx, ГОСТ Р ххх
+	GOST_ISO                         // ГОСТ ИСО ххх, ГОСТ ISO ххх, ГОСТ Р ИСО ххх, ГОСТ Р ISO ххх
+	DIN                              // DIN xxx, DIN EN xxx
+	TU                               // ТУ ххх, ТУ У ххх
+	STO                              // СТО ххх
+	OST                              // ОСТ ххх
+	ST_CKBA                          // СТ ЦКБА ххх
+)
+
 type Keyword struct {
-	Value string
-	Type  KeywordType
+	Value        string
+	Type         KeywordType
+	StandardType StandardType
 }
