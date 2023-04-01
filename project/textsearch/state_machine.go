@@ -2,6 +2,11 @@ package textsearch
 
 import "strings"
 
+const (
+	initialState = ">"
+	finalState   = "<"
+)
+
 type state struct {
 	transitions []stateTransition
 	isFinal     bool
@@ -18,48 +23,59 @@ type stateMachine struct {
 	keywordType KeywordType
 	root        *state
 
-	current  *state
-	keyword  strings.Builder
-	onFinish func(keyword Keyword)
+	current *state
+	keyword strings.Builder
 }
 
-func (m *stateMachine) Handle(char rune) {
+func (m *stateMachine) Reset() {
+	m.current = nil
+	m.keyword = strings.Builder{}
+}
+
+func (m *stateMachine) Handle(char rune) bool {
 	// автомат еще не начал свою работу, состояние пустое
 	if m.current == nil {
 		for _, transition := range m.root.transitions {
 			if transition.condition.Matches(char) {
 				m.handleTransition(char, transition)
 
-				break
+				return true
 			}
 		}
 
-		return
+		return false
 	}
 
 	for _, transition := range m.current.transitions {
 		if transition.condition.Matches(char) {
 			m.handleTransition(char, transition)
 
-			return
+			return true
 		}
 	}
 
-	// если условия не подошли, но текущее состояние является конечным, то совпадение найдено
-	if m.current.isFinal {
-		m.finishKeyword()
-	}
+	return false
+}
 
-	m.current = nil
-	m.keyword = strings.Builder{}
+func (m *stateMachine) Finish() {
+	if m.current != nil && !m.current.isFinal {
+		m.Handle(0)
+	}
+}
+
+func (m *stateMachine) IsFinished() bool {
+	return m.current != nil && m.current.isFinal
+}
+
+func (m *stateMachine) Get() []Keyword {
+	return []Keyword{{Value: m.keyword.String(), Type: m.keywordType}}
 }
 
 func (m *stateMachine) handleTransition(char rune, transition stateTransition) {
 	m.current = transition.target
-	if transition.isCharIgnored {
+	if char == 0 || transition.isCharIgnored {
 		return
 	}
-
 	if transition.replacement > 0 {
 		m.keyword.WriteRune(transition.replacement)
 	} else {
@@ -67,32 +83,21 @@ func (m *stateMachine) handleTransition(char rune, transition stateTransition) {
 	}
 }
 
-func (m *stateMachine) Finish() {
-	if m.current != nil && m.current.isFinal {
-		m.finishKeyword()
-	}
-}
-
-func (m *stateMachine) finishKeyword() {
-	m.onFinish(Keyword{
-		Value: m.keyword.String(),
-		Type:  m.keywordType,
-	})
-}
-
-func newStateMachine(p pattern, onFinish func(keyword Keyword)) *stateMachine {
-	states := make([]state, len(p.nodes)+1)
-	indices := make(map[string]int, len(p.nodes)+1)
+func newStateMachine(p pattern) *stateMachine {
+	states := make([]state, len(p.nodes)+2)
+	states[len(states)-1].isFinal = true
+	indices := make(map[string]int, len(p.nodes)+2)
 
 	index := 1
 	for key := range p.nodes {
-		if key == "" {
+		if key == initialState {
 			indices[key] = 0
 		} else {
 			indices[key] = index
 			index++
 		}
 	}
+	indices[finalState] = len(states) - 1
 
 	for key, node := range p.nodes {
 		transitions := make([]stateTransition, len(node.transitions))
@@ -103,13 +108,11 @@ func newStateMachine(p pattern, onFinish func(keyword Keyword)) *stateMachine {
 			transitions[j].target = &states[indices[transition.target]]
 		}
 
-		states[indices[key]].isFinal = node.isFinal
 		states[indices[key]].transitions = transitions
 	}
 
 	return &stateMachine{
 		keywordType: p.keywordType,
 		root:        &states[0],
-		onFinish:    onFinish,
 	}
 }

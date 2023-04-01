@@ -13,6 +13,10 @@ func TestParse(t *testing.T) {
 		wantKeywords []textsearch.Keyword
 	}{
 		{
+			text:         "",
+			wantKeywords: []textsearch.Keyword{},
+		},
+		{
 			text: "гост",
 			wantKeywords: []textsearch.Keyword{
 				{Value: "гост", Type: textsearch.NaturalWord},
@@ -20,6 +24,12 @@ func TestParse(t *testing.T) {
 		},
 		{
 			text: "ГОСТ 1234",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "гост 1234", Type: textsearch.StandardCode},
+			},
+		},
+		{
+			text: "ГОСТ 1234 ",
 			wantKeywords: []textsearch.Keyword{
 				{Value: "гост 1234", Type: textsearch.StandardCode},
 			},
@@ -145,6 +155,27 @@ func TestParse(t *testing.T) {
 			wantKeywords: []textsearch.Keyword{
 				{Value: "болт", Type: textsearch.NaturalWord},
 				{Value: "гост 1234-56", Type: textsearch.StandardCode},
+			},
+		},
+		{
+			text: "ГОСТ 1234-56 БОЛТ",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "гост 1234-56", Type: textsearch.StandardCode},
+				{Value: "болт", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "ГОСТ 123болт",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "гост", Type: textsearch.NaturalWord},
+				{Value: "123болт", Type: textsearch.GenericCode},
+			},
+		},
+		{
+			text: "Электровоз ЭД4М",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "электровоз", Type: textsearch.NaturalWord},
+				{Value: "эд4м", Type: textsearch.GenericCode},
 			},
 		},
 	}

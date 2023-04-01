@@ -13,7 +13,6 @@ type pattern struct {
 
 type patternNode struct {
 	transitions []patternTransition
-	isFinal     bool
 }
 
 type patternTransition struct {
@@ -35,10 +34,28 @@ func (d digit) Matches(c rune) bool {
 	return unicode.IsDigit(c)
 }
 
+type null struct{}
+
+func (n null) Matches(c rune) bool {
+	return c == 0
+}
+
 type space struct{}
 
 func (s space) Matches(c rune) bool {
 	return unicode.IsSpace(c)
+}
+
+type notSpace struct{}
+
+func (d notSpace) Matches(c rune) bool {
+	return c > 0 && !unicode.IsSpace(c)
+}
+
+type letter struct{}
+
+func (a letter) Matches(c rune) bool {
+	return unicode.IsLetter(c)
 }
 
 type oneOf []rune

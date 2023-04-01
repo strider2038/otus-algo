@@ -18,7 +18,7 @@ var standardCodePattern = pattern{
 	// "СТ ЦКБА 1580"
 	keywordType: StandardCode,
 	nodes: map[string]patternNode{
-		"": {
+		initialState: {
 			transitions: []patternTransition{
 				{condition: exact('г'), target: "гост_г"},
 				{condition: exact('d'), target: "din_d"},
@@ -148,14 +148,52 @@ var standardCodePattern = pattern{
 			transitions: []patternTransition{
 				{condition: digit{}, target: "гост_цифра"},
 				{condition: oneOf{'.', '-'}, target: "гост_разделитель"},
+				{condition: space{}, target: finalState, isCharIgnored: true},
+				{condition: null{}, target: finalState},
 			},
-			isFinal: true,
 		},
 		"гост_разделитель": {
 			transitions: []patternTransition{
 				{condition: digit{}, target: "гост_цифра"},
+				{condition: space{}, target: finalState, isCharIgnored: true}, // todo: test char
+				{condition: null{}, target: finalState},
 			},
-			isFinal: true,
+		},
+	},
+}
+
+var naturalWordPattern = pattern{
+	keywordType: NaturalWord,
+	nodes: map[string]patternNode{
+		initialState: {
+			transitions: []patternTransition{
+				{condition: letter{}, target: "letter"},
+			},
+		},
+		"letter": {
+			transitions: []patternTransition{
+				{condition: letter{}, target: "letter"},
+				{condition: space{}, target: finalState, isCharIgnored: true}, // todo: test char
+				{condition: null{}, target: finalState},
+			},
+		},
+	},
+}
+
+var genericCodePattern = pattern{
+	keywordType: GenericCode,
+	nodes: map[string]patternNode{
+		initialState: {
+			transitions: []patternTransition{
+				{condition: notSpace{}, target: "any"},
+			},
+		},
+		"any": {
+			transitions: []patternTransition{
+				{condition: notSpace{}, target: "any"},
+				{condition: space{}, target: finalState, isCharIgnored: true}, // todo: test char
+				{condition: null{}, target: finalState},
+			},
 		},
 	},
 }
