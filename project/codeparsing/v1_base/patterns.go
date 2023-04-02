@@ -1,6 +1,6 @@
-package textsearch
+package v1_base
 
-import "github.com/strider2038/otus-algo/project/textsearch/code"
+import "github.com/strider2038/otus-algo/project/codeparsing/code"
 
 // Конфигурация конечного автомата для обнаружения названий стандартов.
 //

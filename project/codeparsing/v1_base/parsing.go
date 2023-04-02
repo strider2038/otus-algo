@@ -1,9 +1,9 @@
-package textsearch
+package v1_base
 
 import (
 	"unicode"
 
-	"github.com/strider2038/otus-algo/project/textsearch/code"
+	"github.com/strider2038/otus-algo/project/codeparsing/code"
 )
 
 // Parse - разбирает название изделия на смысловые блоки, подходящие для

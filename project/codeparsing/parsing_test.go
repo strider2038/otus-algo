@@ -1,12 +1,22 @@
-package textsearch_test
+package codeparsing_test
 
 import (
 	"testing"
 
 	"github.com/strider2038/otus-algo/datatesting"
-	"github.com/strider2038/otus-algo/project/textsearch"
-	"github.com/strider2038/otus-algo/project/textsearch/code"
+	"github.com/strider2038/otus-algo/project/codeparsing/code"
+	"github.com/strider2038/otus-algo/project/codeparsing/v1_base"
 )
+
+const boltName = ` 
+	Болт с шестигранной уменьшенной головкой 
+	и направляющим подголовком
+	М10х100.36 
+	исп. 1 
+	тип А 
+	класса точности Б 
+	ГОСТ 15590-70 
+`
 
 type TestCase struct {
 	text         string
@@ -644,25 +654,66 @@ var realCases = []TestCase{
 			{Value: "8328-75", Type: code.StandardCode, StandardType: code.GOST},
 		},
 	},
+	{
+		text: boltName,
+		wantKeywords: []code.Keyword{
+			{Value: "болт", Type: code.NaturalWord},
+			{Value: "с", Type: code.NaturalWord},
+			{Value: "шестигранной", Type: code.NaturalWord},
+			{Value: "уменьшенной", Type: code.NaturalWord},
+			{Value: "головкой", Type: code.NaturalWord},
+			{Value: "и", Type: code.NaturalWord},
+			{Value: "направляющим", Type: code.NaturalWord},
+			{Value: "подголовком", Type: code.NaturalWord},
+			{Value: "м10х100.36", Type: code.GenericCode},
+			{Value: "1", Type: code.VersionCode},
+			{Value: "а", Type: code.TypeCode},
+			{Value: "б", Type: code.AccuracyClassCode},
+			{Value: "15590-70", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
 }
 
-func TestParse(t *testing.T) {
-	tests := []TestCase{}
-	tests = append(tests, basicCases...)
-	tests = append(tests, standardsCases...)
-	tests = append(tests, versionCodeCases...)
-	tests = append(tests, accuracyClassCodeCases...)
-	tests = append(tests, typeCodeCases...)
-	tests = append(tests, variationSuffixCases...)
-	tests = append(tests, spaceCases...)
-	tests = append(tests, naturalWordCases...)
-	tests = append(tests, combinationCases...)
-	tests = append(tests, realCases...)
-	for _, test := range tests {
-		t.Run(test.text, func(t *testing.T) {
-			got := textsearch.Parse(test.text)
+type ParsingFunctionCase struct {
+	name  string
+	parse func(text string) []code.Keyword
+}
 
-			datatesting.AssertEqualArrays(t, test.wantKeywords, got)
-		})
+var parsingCases = []ParsingFunctionCase{
+	{name: "base", parse: v1_base.Parse},
+}
+
+var allCases = mergeCases(
+	basicCases,
+	standardsCases,
+	versionCodeCases,
+	accuracyClassCodeCases,
+	typeCodeCases,
+	variationSuffixCases,
+	spaceCases,
+	naturalWordCases,
+	combinationCases,
+	realCases,
+)
+
+func TestParse(t *testing.T) {
+	for _, test := range allCases {
+		for _, parsingCase := range parsingCases {
+			t.Run(parsingCase.name+": "+test.text, func(t *testing.T) {
+				got := parsingCase.parse(test.text)
+
+				datatesting.AssertEqualArrays(t, test.wantKeywords, got)
+			})
+		}
 	}
+}
+
+func mergeCases(cases ...[]TestCase) []TestCase {
+	all := make([]TestCase, 0, len(cases))
+
+	for _, testCases := range cases {
+		all = append(all, testCases...)
+	}
+
+	return all
 }

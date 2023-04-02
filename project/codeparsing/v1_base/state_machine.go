@@ -1,9 +1,9 @@
-package textsearch
+package v1_base
 
 import (
 	"strings"
 
-	"github.com/strider2038/otus-algo/project/textsearch/code"
+	"github.com/strider2038/otus-algo/project/codeparsing/code"
 )
 
 const (
