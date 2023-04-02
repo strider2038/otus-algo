@@ -81,7 +81,7 @@ func (v variationCode) Matches(c rune) bool {
 		return true
 	}
 	switch c {
-	case 'а', 'б', 'в', 'н':
+	case 'а', 'б', 'в', 'н', ',', '.':
 		return true
 	}
 	return false

@@ -10,6 +10,8 @@ func (p *parser) Parse(text []rune) []Keyword {
 	sms := []*stateMachine{
 		newStateMachine(standardCodePattern),
 		newStateMachine(versionCodePattern),
+		newStateMachine(accuracyClassPattern),
+		newStateMachine(typeCodePattern),
 		newStateMachine(naturalWordPattern),
 		newStateMachine(genericCodePattern),
 	}

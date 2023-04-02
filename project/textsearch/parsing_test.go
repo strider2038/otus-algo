@@ -341,37 +341,43 @@ func TestParse(t *testing.T) {
 		{
 			text: "Класс Точности A",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности a", Type: textsearch.AccuracyClassCode},
+				{Value: "a", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
 			text: "Класс Точности Б",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+				{Value: "б", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
-			text: "классов точности B",
+			text: "классов точности B", // latin
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+				{Value: "b", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
-			text: "класса точности B",
+			text: "класса точности B", // latin
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+				{Value: "b", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
-			text: "классом точности B",
+			text: "классом точности B", // latin
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+				{Value: "b", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
 			text: "классом точности 0,5",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "класс точности 0,5", Type: textsearch.AccuracyClassCode},
+				{Value: "0,5", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "классом точности 0.5",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "0.5", Type: textsearch.AccuracyClassCode},
 			},
 		},
 		{
@@ -384,45 +390,45 @@ func TestParse(t *testing.T) {
 		{
 			text: "Тип 2",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "тип 2", Type: textsearch.TypeCode},
+				{Value: "2", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "ТИПА B",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "тип b", Type: textsearch.TypeCode},
+				{Value: "b", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "тип u",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "тип u", Type: textsearch.TypeCode},
+				{Value: "u", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "тип Abc",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "тип abc", Type: textsearch.TypeCode},
+				{Value: "abc", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "тип ваб",
 			wantKeywords: []textsearch.Keyword{
-				{Value: "тип vab", Type: textsearch.TypeCode},
+				{Value: "ваб", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "винт тип Н", // cyrillic
 			wantKeywords: []textsearch.Keyword{
 				{Value: "винт", Type: textsearch.NaturalWord},
-				{Value: "тип h", Type: textsearch.TypeCode},
+				{Value: "н", Type: textsearch.TypeCode},
 			},
 		},
 		{
 			text: "винт тип H", // latin
 			wantKeywords: []textsearch.Keyword{
 				{Value: "винт", Type: textsearch.NaturalWord},
-				{Value: "тип h", Type: textsearch.TypeCode},
+				{Value: "h", Type: textsearch.TypeCode},
 			},
 		},
 		{
