@@ -74,6 +74,19 @@ func (oneOf oneOf) Matches(c rune) bool {
 	return false
 }
 
+type variationCode struct{}
+
+func (v variationCode) Matches(c rune) bool {
+	if unicode.IsDigit(c) || c >= 'a' && c <= 'z' {
+		return true
+	}
+	switch c {
+	case 'а', 'б', 'в', 'н':
+		return true
+	}
+	return false
+}
+
 func setStandardType(t StandardType) func(r *result) {
 	return func(r *result) {
 		r.subType = t

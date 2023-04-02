@@ -162,6 +162,61 @@ var standardCodePattern = pattern{
 	},
 }
 
+var versionCodePattern = pattern{
+	keywordType: VersionCode,
+	nodes: map[string]patternNode{
+		initialState: {
+			transitions: []patternTransition{
+				{condition: exact('и'), target: "и", isCharIgnored: true},
+			},
+		},
+		"и": {transitions: []patternTransition{{condition: exact('с'), target: "с", isCharIgnored: true}}},
+		"с": {transitions: []patternTransition{{condition: exact('п'), target: "п", isCharIgnored: true}}},
+		"п": {transitions: []patternTransition{
+			{condition: exact('о'), target: "о", isCharIgnored: true},
+			{condition: exact('.'), target: "точка", isCharIgnored: true},
+			{condition: digit{}, target: "код_1"},
+			{condition: space{}, target: "пробел", isCharIgnored: true},
+		}},
+		"о":   {transitions: []patternTransition{{condition: exact('л'), target: "л", isCharIgnored: true}}},
+		"л":   {transitions: []patternTransition{{condition: exact('н'), target: "н", isCharIgnored: true}}},
+		"н":   {transitions: []patternTransition{{condition: exact('е'), target: "е", isCharIgnored: true}}},
+		"е":   {transitions: []patternTransition{{condition: exact('н'), target: "н_2", isCharIgnored: true}}},
+		"н_2": {transitions: []patternTransition{{condition: exact('и'), target: "и_2", isCharIgnored: true}}},
+		"и_2": {transitions: []patternTransition{
+			{condition: exact('е'), target: "е_2", isCharIgnored: true},
+			{condition: exact('я'), target: "я", isCharIgnored: true},
+		}},
+		"е_2": {transitions: []patternTransition{
+			{condition: space{}, target: "пробел", isCharIgnored: true},
+			{condition: digit{}, target: "код_1"},
+		}},
+		"я": {transitions: []patternTransition{{condition: space{}, target: "пробел", isCharIgnored: true}}},
+		"точка": {transitions: []patternTransition{
+			{condition: space{}, target: "пробел", isCharIgnored: true},
+			{condition: variationCode{}, target: "код_1"},
+		}},
+		// todo: пропуски пробелов
+		"пробел": {transitions: []patternTransition{
+			{condition: variationCode{}, target: "код_1"},
+		}},
+		"код_1": {transitions: []patternTransition{
+			{condition: variationCode{}, target: "код_2"},
+			{condition: space{}, target: finalState, isCharIgnored: true},
+			{condition: null{}, target: finalState},
+		}},
+		"код_2": {transitions: []patternTransition{
+			{condition: variationCode{}, target: "код_3"},
+			{condition: space{}, target: finalState, isCharIgnored: true},
+			{condition: null{}, target: finalState},
+		}},
+		"код_3": {transitions: []patternTransition{
+			{condition: space{}, target: finalState, isCharIgnored: true},
+			{condition: null{}, target: finalState},
+		}},
+	},
+}
+
 var naturalWordPattern = pattern{
 	keywordType: NaturalWord,
 	nodes: map[string]patternNode{

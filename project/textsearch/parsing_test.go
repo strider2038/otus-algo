@@ -221,6 +221,223 @@ func TestParse(t *testing.T) {
 				{Value: "какое′то", Type: textsearch.NaturalWord},
 			},
 		},
+		{
+			text: "Исполнение 1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "Исполнения 1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "Исполнение1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "Исп 1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "Исп. 1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "ИСП 1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп.1",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп z",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "z", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп 12 ",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "12", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп 123 ",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "123", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп 1234 ",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "исп", Type: textsearch.NaturalWord},
+				{Value: "1234", Type: textsearch.GenericCode},
+			},
+		},
+		{
+			text: "исп абв",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "абв", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп н",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "н", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп.Б",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "б", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп. В",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "в", Type: textsearch.VersionCode},
+			},
+		},
+		{
+			text: "исп.1 кольцо",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "1", Type: textsearch.VersionCode},
+				{Value: "кольцо", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "исп гайки",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "исп", Type: textsearch.NaturalWord},
+				{Value: "гайки", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "Исполнение",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "исполнение", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "Класс Точности A",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности a", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "Класс Точности Б",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "классов точности B",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "класса точности B",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "классом точности B",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности b", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "классом точности 0,5",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс точности 0,5", Type: textsearch.AccuracyClassCode},
+			},
+		},
+		{
+			text: "класс точности",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс", Type: textsearch.NaturalWord},
+				{Value: "точности", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "Тип 2",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип 2", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "ТИПА B",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип b", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "тип u",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип u", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "тип Abc",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип abc", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "тип ваб",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип vab", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "винт тип Н", // cyrillic
+			wantKeywords: []textsearch.Keyword{
+				{Value: "винт", Type: textsearch.NaturalWord},
+				{Value: "тип h", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "винт тип H", // latin
+			wantKeywords: []textsearch.Keyword{
+				{Value: "винт", Type: textsearch.NaturalWord},
+				{Value: "тип h", Type: textsearch.TypeCode},
+			},
+		},
+		{
+			text: "тип подшипника",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "тип", Type: textsearch.NaturalWord},
+				{Value: "подшипника", Type: textsearch.NaturalWord},
+			},
+		},
+		{
+			text: "класс",
+			wantKeywords: []textsearch.Keyword{
+				{Value: "класс", Type: textsearch.NaturalWord},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.text, func(t *testing.T) {
