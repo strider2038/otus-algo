@@ -1,5 +1,6 @@
-package textsearch
+package code
 
+// KeywordType - тип ключевого слова.
 type KeywordType int
 
 const (
@@ -11,7 +12,7 @@ const (
 	AccuracyClassCode                        // блок обозначения класса точности (например, "класс точности A")
 )
 
-// StandardType - типы обозначений стандартов
+// StandardType - тип обозначения стандарта.
 type StandardType int
 
 const (

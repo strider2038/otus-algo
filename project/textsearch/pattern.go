@@ -1,21 +1,24 @@
 package textsearch
 
-import "unicode"
+import (
+	"unicode"
 
+	"github.com/strider2038/otus-algo/project/textsearch/code"
+)
+
+// matcher - интерфейс для различных способов проверки символа.
 type matcher interface {
 	Matches(c rune) bool
 }
 
+// pattern - конфигурация для конечного автомата с картой переходов.
+// Используется только для удобного конфигурирования конечного автомата.
 type pattern struct {
-	nodes       map[string]patternNode
-	keywordType KeywordType
+	nodes       map[string][]patternTransition
+	keywordType code.KeywordType
 }
 
-type patternNode struct {
-	// todo: unpack ?
-	transitions []patternTransition
-}
-
+// patternTransition - параметры перехода в следующее состояние.
 type patternTransition struct {
 	condition    matcher
 	target       string
@@ -87,7 +90,7 @@ func (v variationCode) Matches(c rune) bool {
 	return false
 }
 
-func setStandardType(t StandardType) func(r *result) {
+func setStandardType(t code.StandardType) func(r *result) {
 	return func(r *result) {
 		r.subType = t
 	}

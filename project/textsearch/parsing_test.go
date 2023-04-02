@@ -5,446 +5,659 @@ import (
 
 	"github.com/strider2038/otus-algo/datatesting"
 	"github.com/strider2038/otus-algo/project/textsearch"
+	"github.com/strider2038/otus-algo/project/textsearch/code"
 )
 
-func TestParse(t *testing.T) {
-	tests := []struct {
-		text         string
-		wantKeywords []textsearch.Keyword
-	}{
-		{
-			text:         "",
-			wantKeywords: []textsearch.Keyword{},
-		},
-		{
-			text: "гост",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "гост", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "ГОСТ 1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 1234 ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: " ГОСТ \t 1234 ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 1234 ГОСТ 4321",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-				{Value: "4321", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 12-34-56",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "12-34-56", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 12.34.56",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "12.34.56", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 1234.",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234.", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-				// {Value: "гост 1234", Type: textsearch.StandardCode}, todo: post processing case
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tР\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tИСО\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST_ISO},
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tISO\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST_ISO},
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tР\t\t\tИСО\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST_ISO},
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tР\t\t\tISO\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST_ISO},
-			},
-		},
-		{
-			text: "ГОСТ\t\t\tР\t\t\tISO\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.GOST_ISO},
-			},
-		},
-		{
-			text: "DIN\t\t\tEN\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.DIN},
-			},
-		},
-		{
-			text: "DIN\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.DIN},
-			},
-		},
-		{
-			text: "ТУ\t\t\tУ\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.TU},
-			},
-		},
-		{
-			text: "ТУ\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.TU},
-			},
-		},
-		{
-			text: "СТО\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.STO},
-			},
-		},
-		{
-			text: "ОСТ\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.OST},
-			},
-		},
-		{
-			text: "СТ\t\t\tЦКБА\t\t\t1234",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234", Type: textsearch.StandardCode, StandardType: textsearch.ST_CKBA},
-			},
-		},
-		{
-			text: "Болт ГОСТ 1234-56",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "болт", Type: textsearch.NaturalWord},
-				{Value: "1234-56", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-			},
-		},
-		{
-			text: "ГОСТ 1234-56 БОЛТ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1234-56", Type: textsearch.StandardCode, StandardType: textsearch.GOST},
-				{Value: "болт", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "ГОСТ 123болт",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "гост", Type: textsearch.NaturalWord},
-				{Value: "123болт", Type: textsearch.GenericCode},
-			},
-		},
-		{
-			text: "Электровоз ЭД4М",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "электровоз", Type: textsearch.NaturalWord},
-				{Value: "эд4м", Type: textsearch.GenericCode},
-			},
-		},
-		{
-			text: "слово",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "слово", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "какое-то",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "какое-то", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "какое'то",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "какое'то", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "какое`то",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "какое`то", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "какое′то",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "какое′то", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "-слово",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "-слово", Type: textsearch.GenericCode},
-				// todo: additional word
-			},
-		},
-		{
-			text: "какое′то",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "какое′то", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "Исполнение 1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "Исполнения 1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "Исполнение1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "Исп 1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "Исп. 1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "ИСП 1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп.1",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп z",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "z", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп 12 ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "12", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп 123 ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "123", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп 1234 ",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "исп", Type: textsearch.NaturalWord},
-				{Value: "1234", Type: textsearch.GenericCode},
-			},
-		},
-		{
-			text: "исп абв",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "абв", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп н",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "н", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп.Б",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "б", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп. В",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "в", Type: textsearch.VersionCode},
-			},
-		},
-		{
-			text: "исп.1 кольцо",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "1", Type: textsearch.VersionCode},
-				{Value: "кольцо", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "исп гайки",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "исп", Type: textsearch.NaturalWord},
-				{Value: "гайки", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "Исполнение",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "исполнение", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "Класс Точности A",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "a", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "Класс Точности Б",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "б", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "классов точности B", // latin
-			wantKeywords: []textsearch.Keyword{
-				{Value: "b", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "класса точности B", // latin
-			wantKeywords: []textsearch.Keyword{
-				{Value: "b", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "классом точности B", // latin
-			wantKeywords: []textsearch.Keyword{
-				{Value: "b", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "классом точности 0,5",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "0,5", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "классом точности 0.5",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "0.5", Type: textsearch.AccuracyClassCode},
-			},
-		},
-		{
-			text: "класс точности",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "класс", Type: textsearch.NaturalWord},
-				{Value: "точности", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "Тип 2",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "2", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "ТИПА B",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "b", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "тип u",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "u", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "тип Abc",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "abc", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "тип ваб",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "ваб", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "винт тип Н", // cyrillic
-			wantKeywords: []textsearch.Keyword{
-				{Value: "винт", Type: textsearch.NaturalWord},
-				{Value: "н", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "винт тип H", // latin
-			wantKeywords: []textsearch.Keyword{
-				{Value: "винт", Type: textsearch.NaturalWord},
-				{Value: "h", Type: textsearch.TypeCode},
-			},
-		},
-		{
-			text: "тип подшипника",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "тип", Type: textsearch.NaturalWord},
-				{Value: "подшипника", Type: textsearch.NaturalWord},
-			},
-		},
-		{
-			text: "класс",
-			wantKeywords: []textsearch.Keyword{
-				{Value: "класс", Type: textsearch.NaturalWord},
-			},
-		},
+type TestCase struct {
+	text         string
+	wantKeywords []code.Keyword
+}
+
+var basicCases = []TestCase{
+	{
+		text:         "",
+		wantKeywords: []code.Keyword{},
+	},
+}
+
+var standardsCases = []TestCase{
+	{
+		text: "гост",
+		wantKeywords: []code.Keyword{
+			{Value: "гост", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "ГОСТ 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 1234 ",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 1234 ГОСТ 4321",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+			{Value: "4321", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 12-34-56",
+		wantKeywords: []code.Keyword{
+			{Value: "12-34-56", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 12.34.56",
+		wantKeywords: []code.Keyword{
+			{Value: "12.34.56", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 1234.",
+		wantKeywords: []code.Keyword{
+			{Value: "1234.", Type: code.StandardCode, StandardType: code.GOST},
+			// {Value: "гост 1234", Type: code.StandardCode}, todo: post processing case
+		},
+	},
+	{
+		text: "ГОСТ Р 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ ИСО 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ ISO 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ Р ИСО 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ Р ISO 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ Р ISO 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "DIN EN 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.DIN},
+		},
+	},
+	{
+		text: "DIN 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.DIN},
+		},
+	},
+	{
+		text: "ТУ У 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.TU},
+		},
+	},
+	{
+		text: "ТУ 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.TU},
+		},
+	},
+	{
+		text: "СТО 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.STO},
+		},
+	},
+	{
+		text: "ОСТ 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.OST},
+		},
+	},
+	{
+		text: "СТ ЦКБА 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.ST_CKBA},
+		},
+	},
+}
+
+var versionCodeCases = []TestCase{
+	{
+		text: "Исполнение 1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Исполнения 1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Исполнение1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Исп 1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Исп. 1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "ИСП 1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп.1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп z",
+		wantKeywords: []code.Keyword{
+			{Value: "z", Type: code.VersionCode},
+		},
+	},
+	{
+		text: " исп аааа ",
+		wantKeywords: []code.Keyword{
+			{Value: "исп", Type: code.NaturalWord},
+			{Value: "аааа", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "исп н",
+		wantKeywords: []code.Keyword{
+			{Value: "н", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп.Б",
+		wantKeywords: []code.Keyword{
+			{Value: "б", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп. В",
+		wantKeywords: []code.Keyword{
+			{Value: "в", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "исп.1 кольцо",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+			{Value: "кольцо", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "исп гайки",
+		wantKeywords: []code.Keyword{
+			{Value: "исп", Type: code.NaturalWord},
+			{Value: "гайки", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "Исполнение",
+		wantKeywords: []code.Keyword{
+			{Value: "исполнение", Type: code.NaturalWord},
+		},
+	},
+}
+
+var accuracyClassCodeCases = []TestCase{
+	{
+		text: "Класс Точности A",
+		wantKeywords: []code.Keyword{
+			{Value: "a", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "Класс Точности Б",
+		wantKeywords: []code.Keyword{
+			{Value: "б", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "классов точности B", // latin
+		wantKeywords: []code.Keyword{
+			{Value: "b", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "класса точности B", // latin
+		wantKeywords: []code.Keyword{
+			{Value: "b", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "классом точности B", // latin
+		wantKeywords: []code.Keyword{
+			{Value: "b", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "классом точности 0,5",
+		wantKeywords: []code.Keyword{
+			{Value: "0,5", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "классом точности 0.5",
+		wantKeywords: []code.Keyword{
+			{Value: "0.5", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "классом точности 0.5",
+		wantKeywords: []code.Keyword{
+			{Value: "0.5", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "класс точности",
+		wantKeywords: []code.Keyword{
+			{Value: "класс", Type: code.NaturalWord},
+			{Value: "точности", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "класс точности аааа",
+		wantKeywords: []code.Keyword{
+			{Value: "класс", Type: code.NaturalWord},
+			{Value: "точности", Type: code.NaturalWord},
+			{Value: "аааа", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "класс",
+		wantKeywords: []code.Keyword{
+			{Value: "класс", Type: code.NaturalWord},
+		},
+	},
+}
+
+var typeCodeCases = []TestCase{
+	{
+		text: "Тип 2",
+		wantKeywords: []code.Keyword{
+			{Value: "2", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "ТИПА B",
+		wantKeywords: []code.Keyword{
+			{Value: "b", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "тип u",
+		wantKeywords: []code.Keyword{
+			{Value: "u", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "тип Abc",
+		wantKeywords: []code.Keyword{
+			{Value: "abc", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "тип ваб",
+		wantKeywords: []code.Keyword{
+			{Value: "ваб", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "тип аааа",
+		wantKeywords: []code.Keyword{
+			{Value: "тип", Type: code.NaturalWord},
+			{Value: "аааа", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "винт тип Н", // cyrillic
+		wantKeywords: []code.Keyword{
+			{Value: "винт", Type: code.NaturalWord},
+			{Value: "н", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "винт тип H", // latin
+		wantKeywords: []code.Keyword{
+			{Value: "винт", Type: code.NaturalWord},
+			{Value: "h", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "тип подшипника",
+		wantKeywords: []code.Keyword{
+			{Value: "тип", Type: code.NaturalWord},
+			{Value: "подшипника", Type: code.NaturalWord},
+		},
+	},
+}
+
+var spaceCases = []TestCase{
+	{
+		text: "ГОСТ\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: " ГОСТ \t 1234 ",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tР\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tИСО\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tISO\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tР\t\t\tИСО\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tР\t\t\tISO\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "ГОСТ\t\t\tР\t\t\tISO\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.GOST_ISO},
+		},
+	},
+	{
+		text: "DIN\t\t\tEN\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.DIN},
+		},
+	},
+	{
+		text: "DIN\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.DIN},
+		},
+	},
+	{
+		text: "ТУ\t\t\tУ\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.TU},
+		},
+	},
+	{
+		text: "ТУ\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.TU},
+		},
+	},
+	{
+		text: "СТО\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.STO},
+		},
+	},
+	{
+		text: "ОСТ\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.OST},
+		},
+	},
+	{
+		text: "СТ\t\t\tЦКБА\t\t\t1234",
+		wantKeywords: []code.Keyword{
+			{Value: "1234", Type: code.StandardCode, StandardType: code.ST_CKBA},
+		},
+	},
+	{
+		text: "Исполнение\t\t\t1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Исп\t\t\t1",
+		wantKeywords: []code.Keyword{
+			{Value: "1", Type: code.VersionCode},
+		},
+	},
+	{
+		text: "Класс\t\t\tТочности\t\t\tA",
+		wantKeywords: []code.Keyword{
+			{Value: "a", Type: code.AccuracyClassCode},
+		},
+	},
+	{
+		text: "Тип\t\t\t2",
+		wantKeywords: []code.Keyword{
+			{Value: "2", Type: code.TypeCode},
+		},
+	},
+	{
+		text: "\t\t\tслово\t\t\t",
+		wantKeywords: []code.Keyword{
+			{Value: "слово", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "\t\t\t123\t\t\t",
+		wantKeywords: []code.Keyword{
+			{Value: "123", Type: code.GenericCode},
+		},
+	},
+}
+
+var variationSuffixCases = createVariationSuffixCases()
+
+func createVariationSuffixCases() []TestCase {
+	suffixes := []string{
+		"1",
+		"12",
+		"123",
+		"1234",
+		"aбв",
+		"1aбв",
+		"aбв1",
+		"а1абв",
+		"аб1абв",
+		"абв1абв",
 	}
+
+	variants := []struct {
+		prefix      string
+		keywordType code.KeywordType
+	}{
+		{prefix: "исполнение", keywordType: code.VersionCode},
+		{prefix: "тип", keywordType: code.TypeCode},
+		{prefix: "класс точности", keywordType: code.AccuracyClassCode},
+	}
+
+	out := make([]TestCase, 0, len(suffixes)*3)
+
+	for _, variant := range variants {
+		for _, suffix := range suffixes {
+			out = append(out, TestCase{
+				text: " " + variant.prefix + " " + suffix + " ",
+				wantKeywords: []code.Keyword{
+					{Value: suffix, Type: variant.keywordType},
+				},
+			})
+		}
+	}
+
+	return out
+}
+
+var naturalWordCases = []TestCase{
+	{
+		text: "слово",
+		wantKeywords: []code.Keyword{
+			{Value: "слово", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "какое-то",
+		wantKeywords: []code.Keyword{
+			{Value: "какое-то", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "какое'то",
+		wantKeywords: []code.Keyword{
+			{Value: "какое'то", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "какое`то",
+		wantKeywords: []code.Keyword{
+			{Value: "какое`то", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "какое′то",
+		wantKeywords: []code.Keyword{
+			{Value: "какое′то", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "-слово",
+		wantKeywords: []code.Keyword{
+			{Value: "-слово", Type: code.GenericCode},
+			// todo: additional word
+		},
+	},
+	{
+		text: "какое′то",
+		wantKeywords: []code.Keyword{
+			{Value: "какое′то", Type: code.NaturalWord},
+		},
+	},
+}
+
+var combinationCases = []TestCase{
+	{
+		text: "Болт ГОСТ 1234-56",
+		wantKeywords: []code.Keyword{
+			{Value: "болт", Type: code.NaturalWord},
+			{Value: "1234-56", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+	{
+		text: "ГОСТ 1234-56 БОЛТ",
+		wantKeywords: []code.Keyword{
+			{Value: "1234-56", Type: code.StandardCode, StandardType: code.GOST},
+			{Value: "болт", Type: code.NaturalWord},
+		},
+	},
+	{
+		text: "ГОСТ 123болт",
+		wantKeywords: []code.Keyword{
+			{Value: "гост", Type: code.NaturalWord},
+			{Value: "123болт", Type: code.GenericCode},
+		},
+	},
+	{
+		text: "Электровоз ЭД4М",
+		wantKeywords: []code.Keyword{
+			{Value: "электровоз", Type: code.NaturalWord},
+			{Value: "эд4м", Type: code.GenericCode},
+		},
+	},
+}
+
+var realCases = []TestCase{
+	{
+		text: "Подшипник роликовый тип 102000 исп.1 ГОСТ 8328-75",
+		wantKeywords: []code.Keyword{
+			{Value: "подшипник", Type: code.NaturalWord},
+			{Value: "роликовый", Type: code.NaturalWord},
+			{Value: "102000", Type: code.TypeCode},
+			{Value: "1", Type: code.VersionCode},
+			{Value: "8328-75", Type: code.StandardCode, StandardType: code.GOST},
+		},
+	},
+}
+
+func TestParse(t *testing.T) {
+	tests := []TestCase{}
+	tests = append(tests, basicCases...)
+	tests = append(tests, standardsCases...)
+	tests = append(tests, versionCodeCases...)
+	tests = append(tests, accuracyClassCodeCases...)
+	tests = append(tests, typeCodeCases...)
+	tests = append(tests, variationSuffixCases...)
+	tests = append(tests, spaceCases...)
+	tests = append(tests, naturalWordCases...)
+	tests = append(tests, combinationCases...)
+	tests = append(tests, realCases...)
 	for _, test := range tests {
 		t.Run(test.text, func(t *testing.T) {
 			got := textsearch.Parse(test.text)
