@@ -1,4 +1,4 @@
-package v1_base
+package v2_preprocessing
 
 import "github.com/strider2038/otus-algo/project/codeparsing/code"
 
@@ -31,21 +31,21 @@ var standardCodePattern = pattern{
 		"гост_г": {{condition: exact('о'), target: "гост_о", isCharIgnored: true}},
 		"гост_о": {{condition: exact('с'), target: "гост_с", isCharIgnored: true}},
 		"гост_с": {{condition: exact('т'), target: "гост_т", isCharIgnored: true}},
-		"гост_т": {{condition: space{}, target: "гост_пробел", replacement: ' ', modifyResult: setStandardType(code.GOST), isCharIgnored: true}},
+		"гост_т": {{condition: space{}, target: "гост_пробел", modifyResult: setStandardType(code.GOST), isCharIgnored: true}},
 		"din_d":  {{condition: exact('i'), target: "din_i", isCharIgnored: true}},
 		"din_i":  {{condition: exact('n'), target: "din_n", isCharIgnored: true}},
-		"din_n":  {{condition: space{}, target: "din_пробел", replacement: ' ', modifyResult: setStandardType(code.DIN), isCharIgnored: true}},
+		"din_n":  {{condition: space{}, target: "din_пробел", modifyResult: setStandardType(code.DIN), isCharIgnored: true}},
 		"ту_т":   {{condition: exact('у'), target: "ту_у", isCharIgnored: true}},
-		"ту_у":   {{condition: space{}, target: "ту_пробел", replacement: ' ', modifyResult: setStandardType(code.TU), isCharIgnored: true}},
+		"ту_у":   {{condition: space{}, target: "ту_пробел", modifyResult: setStandardType(code.TU), isCharIgnored: true}},
 		"сто_с":  {{condition: exact('т'), target: "сто_т", isCharIgnored: true}},
 		"сто_т": {
 			{condition: exact('о'), target: "сто_о", isCharIgnored: true},
-			{condition: space{}, target: "ст_пробел", replacement: ' ', isCharIgnored: true},
+			{condition: space{}, target: "ст_пробел", isCharIgnored: true},
 		},
-		"сто_о": {{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', modifyResult: setStandardType(code.STO), isCharIgnored: true}},
+		"сто_о": {{condition: space{}, target: "гост_пробел_разделитель", modifyResult: setStandardType(code.STO), isCharIgnored: true}},
 		"ост_о": {{condition: exact('с'), target: "ост_с", isCharIgnored: true}},
 		"ост_с": {{condition: exact('т'), target: "ост_т", isCharIgnored: true}},
-		"ост_т": {{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', modifyResult: setStandardType(code.OST), isCharIgnored: true}},
+		"ост_т": {{condition: space{}, target: "гост_пробел_разделитель", modifyResult: setStandardType(code.OST), isCharIgnored: true}},
 		"гост_пробел": {
 			{condition: digit{}, target: "гост_цифра"},
 			{condition: space{}, target: "гост_пробел", isCharIgnored: true},
@@ -71,13 +71,13 @@ var standardCodePattern = pattern{
 			{condition: exact('n'), target: "din_en_n", isCharIgnored: true},
 		},
 		"din_en_n": {
-			{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', isCharIgnored: true},
+			{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true},
 		},
 		"ту_у_у": {
-			{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', isCharIgnored: true},
+			{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true},
 		},
 		"гост_р": {
-			{condition: space{}, target: "гост_р_пробел", replacement: ' ', isCharIgnored: true},
+			{condition: space{}, target: "гост_р_пробел", isCharIgnored: true},
 		},
 		"гост_р_пробел": {
 			{condition: digit{}, target: "гост_цифра"},
@@ -92,7 +92,7 @@ var standardCodePattern = pattern{
 			{condition: exact('о'), target: "гост_исо_о", isCharIgnored: true},
 		},
 		"гост_исо_о": {
-			{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', modifyResult: setStandardType(code.GOST_ISO), isCharIgnored: true},
+			{condition: space{}, target: "гост_пробел_разделитель", modifyResult: setStandardType(code.GOST_ISO), isCharIgnored: true},
 		},
 		"гост_iso_i": {
 			{condition: exact('s'), target: "гост_iso_s", isCharIgnored: true},
@@ -101,12 +101,12 @@ var standardCodePattern = pattern{
 			{condition: exact('o'), target: "гост_iso_o", isCharIgnored: true},
 		},
 		"гост_iso_o": {
-			{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', modifyResult: setStandardType(code.GOST_ISO), isCharIgnored: true},
+			{condition: space{}, target: "гост_пробел_разделитель", modifyResult: setStandardType(code.GOST_ISO), isCharIgnored: true},
 		},
 		"ст_цкба_ц": {{condition: exact('к'), target: "ст_цкба_к", isCharIgnored: true}},
 		"ст_цкба_к": {{condition: exact('б'), target: "ст_цкба_б", isCharIgnored: true}},
 		"ст_цкба_б": {{condition: exact('а'), target: "ст_цкба_а", isCharIgnored: true}},
-		"ст_цкба_а": {{condition: space{}, target: "гост_пробел_разделитель", replacement: ' ', isCharIgnored: true}},
+		"ст_цкба_а": {{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true}},
 		"гост_пробел_разделитель": {
 			{condition: digit{}, target: "гост_цифра"},
 			{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true},
@@ -115,12 +115,10 @@ var standardCodePattern = pattern{
 			{condition: digit{}, target: "гост_цифра"},
 			{condition: oneOf{'.', '-'}, target: "гост_разделитель"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"гост_разделитель": {
 			{condition: digit{}, target: "гост_цифра"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 	},
 }
@@ -175,24 +173,20 @@ var versionCodePattern = pattern{
 		"код": {
 			{condition: variationCode{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_1": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_2"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_2": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_3"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_3": {
 			{condition: digit{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 	},
 }
@@ -246,24 +240,20 @@ var accuracyClassPattern = pattern{
 		"код": {
 			{condition: variationCode{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_1": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_2"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_2": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_3"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_3": {
 			{condition: digit{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 	},
 }
@@ -292,24 +282,20 @@ var typeCodePattern = pattern{
 		"код": {
 			{condition: variationCode{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_1": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_2"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_2": {
 			{condition: digit{}, target: "код"},
 			{condition: variationCode{}, target: "буквенный_код_3"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"буквенный_код_3": {
 			{condition: digit{}, target: "код"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 	},
 }
@@ -324,7 +310,6 @@ var naturalWordPattern = pattern{
 			{condition: letter{}, target: "letter"},
 			{condition: oneOf{'-', '\'', '`', '′'}, target: "delimiter"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 		"delimiter": {
 			{condition: letter{}, target: "letter"},
@@ -341,7 +326,6 @@ var genericCodePattern = pattern{
 		"any": {
 			{condition: notSpace{}, target: "any"},
 			{condition: space{}, target: finalState, isCharIgnored: true},
-			{condition: null{}, target: finalState},
 		},
 	},
 }

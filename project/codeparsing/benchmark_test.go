@@ -9,6 +9,7 @@ import (
 func BenchmarkParse_FullCase(b *testing.B) {
 	for _, parsingCase := range parsingCases {
 		b.Run(parsingCase.name, func(b *testing.B) {
+			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				_ = parsingCase.parse(boltName)
 			}
@@ -19,6 +20,7 @@ func BenchmarkParse_FullCase(b *testing.B) {
 func BenchmarkParse_TestCases(b *testing.B) {
 	for _, parsingCase := range parsingCases {
 		b.Run(parsingCase.name, func(b *testing.B) {
+			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				for _, test := range allCases {
 					_ = parsingCase.parse(test.text)
@@ -33,6 +35,7 @@ func BenchmarkParse_RealCases(b *testing.B) {
 
 	for _, parsingCase := range parsingCases {
 		b.Run(parsingCase.name, func(b *testing.B) {
+			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				for _, name := range names {
 					_ = parsingCase.parse(name)

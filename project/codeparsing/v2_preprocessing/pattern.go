@@ -1,4 +1,4 @@
-package v1_base
+package v2_preprocessing
 
 import (
 	"unicode"
@@ -25,7 +25,6 @@ type patternTransition struct {
 	modifyResult func(result *result)
 
 	isCharIgnored bool // символ не добавляется в результат при этом переходе
-	replacement   rune // символ для замены
 }
 
 type exact rune
@@ -40,22 +39,17 @@ func (d digit) Matches(c rune) bool {
 	return unicode.IsDigit(c)
 }
 
-type null struct{}
-
-func (n null) Matches(c rune) bool {
-	return c == 0
-}
-
 type space struct{}
 
 func (s space) Matches(c rune) bool {
-	return unicode.IsSpace(c)
+	// оптимизация: простое сравнение с пробелом за счет предобработки
+	return c == ' '
 }
 
 type notSpace struct{}
 
 func (d notSpace) Matches(c rune) bool {
-	return c > 0 && !unicode.IsSpace(c)
+	return c > 0 && c != ' '
 }
 
 type letter struct{}

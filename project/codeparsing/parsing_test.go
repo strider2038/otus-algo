@@ -6,6 +6,7 @@ import (
 	"github.com/strider2038/otus-algo/datatesting"
 	"github.com/strider2038/otus-algo/project/codeparsing/code"
 	"github.com/strider2038/otus-algo/project/codeparsing/v1_base"
+	"github.com/strider2038/otus-algo/project/codeparsing/v2_preprocessing"
 )
 
 const boltName = ` 
@@ -24,10 +25,9 @@ type TestCase struct {
 }
 
 var basicCases = []TestCase{
-	{
-		text:         "",
-		wantKeywords: []code.Keyword{},
-	},
+	{text: "", wantKeywords: []code.Keyword{}},
+	{text: " ", wantKeywords: []code.Keyword{}},
+	{text: "\t \n", wantKeywords: []code.Keyword{}},
 }
 
 var standardsCases = []TestCase{
@@ -76,6 +76,13 @@ var standardsCases = []TestCase{
 	},
 	{
 		text: "ГОСТ 1234.",
+		wantKeywords: []code.Keyword{
+			{Value: "1234.", Type: code.StandardCode, StandardType: code.GOST},
+			// {Value: "гост 1234", Type: code.StandardCode}, todo: post processing case
+		},
+	},
+	{
+		text: "ГОСТ 1234. ",
 		wantKeywords: []code.Keyword{
 			{Value: "1234.", Type: code.StandardCode, StandardType: code.GOST},
 			// {Value: "гост 1234", Type: code.StandardCode}, todo: post processing case
@@ -679,10 +686,6 @@ type ParsingFunctionCase struct {
 	parse func(text string) []code.Keyword
 }
 
-var parsingCases = []ParsingFunctionCase{
-	{name: "base", parse: v1_base.Parse},
-}
-
 var allCases = mergeCases(
 	basicCases,
 	standardsCases,
@@ -695,6 +698,11 @@ var allCases = mergeCases(
 	combinationCases,
 	realCases,
 )
+
+var parsingCases = []ParsingFunctionCase{
+	{name: "base", parse: v1_base.Parse},
+	{name: "preprocessing", parse: v2_preprocessing.Parse},
+}
 
 func TestParse(t *testing.T) {
 	for _, test := range allCases {
