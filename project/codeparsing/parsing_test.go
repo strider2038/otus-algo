@@ -1,6 +1,9 @@
 package codeparsing_test
 
 import (
+	"github.com/strider2038/otus-algo/project/codeparsing/v1_base"
+	"github.com/strider2038/otus-algo/project/codeparsing/v2_preprocessing"
+	"github.com/strider2038/otus-algo/project/codeparsing/v3_complex_fsm"
 	"testing"
 
 	"github.com/strider2038/otus-algo/datatesting"
@@ -163,6 +166,13 @@ var standardsCases = []TestCase{
 		text: "СТ ЦКБА 1234",
 		wantKeywords: []code.Keyword{
 			{Value: "1234", Type: code.StandardCode, StandardType: code.ST_CKBA},
+		},
+	},
+	{
+		text: "НЕГОСТ 1234",
+		wantKeywords: []code.Keyword{
+			{Value: "негост", Type: code.NaturalWord},
+			{Value: "1234", Type: code.GenericCode},
 		},
 	},
 }
@@ -699,9 +709,9 @@ var allCases = mergeCases(
 )
 
 var parsingCases = []ParsingFunctionCase{
-	// {name: "base", parse: v1_base.Parse},
-	// {name: "preprocessing", parse: v2_preprocessing.Parse},
-	// {name: "complex fsm", parse: v3_complex_fsm.Parse},
+	{name: "base", parse: v1_base.Parse},
+	{name: "preprocessing", parse: v2_preprocessing.Parse},
+	{name: "complex fsm", parse: v3_complex_fsm.Parse},
 	{name: "regexp", parse: v4_regexp.Parse},
 }
 
