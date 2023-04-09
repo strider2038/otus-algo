@@ -70,7 +70,7 @@ func parseKeywords(text []rune) []code.Keyword {
 			parsedCount := 0
 			i := offset
 			for ; i < len(text); i++ {
-				if parser.Handle(text[i]) {
+				if parser.Handle(i, text[i]) {
 					parsedCount++
 				} else {
 					break
@@ -79,7 +79,7 @@ func parseKeywords(text []rune) []code.Keyword {
 			// если конечный автомат успешно отработал, то добавляем распознанные блоки
 			// и смещаемся к следующему блоку
 			if parser.IsFinished() {
-				keywords = append(keywords, parser.Get()...)
+				keywords = append(keywords, parser.Get(text)...)
 				offset += parsedCount
 
 				break

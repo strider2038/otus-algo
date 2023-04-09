@@ -1,8 +1,6 @@
 package v3_complex_fsm
 
 import (
-	"strings"
-
 	"github.com/strider2038/otus-algo/project/codeparsing/code"
 )
 
@@ -13,7 +11,8 @@ const (
 
 // result - результат работы парсера (конечного автомата).
 type result struct {
-	value       strings.Builder
+	start       int
+	end         int
 	keywordType code.KeywordType
 	subType     code.StandardType
 }
@@ -30,6 +29,7 @@ type stateTransition struct {
 	target    *state  // следующее состояние автомата
 
 	modifyResult  func(result *result) // замыкание для модификации результата
+	start         bool                 // текущая позиция помечается как начало целевого отрезка
 	isCharIgnored bool                 // символ не добавляется в результат при этом переходе
 }
 
@@ -61,6 +61,7 @@ func newStateMachine(p pattern) *stateMachine {
 		transitions := make([]stateTransition, len(nodeTransitions))
 		for j, transition := range nodeTransitions {
 			transitions[j].condition = transition.condition
+			transitions[j].start = transition.start
 			transitions[j].isCharIgnored = transition.isCharIgnored
 			transitions[j].modifyResult = transition.modifyResult
 			transitions[j].target = &states[indices[transition.target]]
@@ -90,17 +91,19 @@ type blockParser struct {
 	result  result
 }
 
-// Handle - принимает следующий символ. Если символ успешно принят (конечный автомат
+// Handle - принимает индекс и следующий символ. Если символ успешно принят (конечный автомат
 // совершил переход в следующее состояние), то возвращается true, иначе false.
 // При получении false обработку следует прервать.
 // После прерывания необходимо проверить перешел ли автомат в конечное состояние
 // вызовом метода IsFinished.
-func (p *blockParser) Handle(char rune) bool {
+func (p *blockParser) Handle(index int, char rune) bool {
 	// автомат еще не начал свою работу, состояние пустое
 	if p.current == nil {
+		p.result.start = index
+
 		for _, transition := range p.root.transitions {
 			if transition.condition.Matches(char) {
-				p.handleTransition(char, transition)
+				p.handleTransition(index, char, transition)
 
 				return true
 			}
@@ -111,7 +114,7 @@ func (p *blockParser) Handle(char rune) bool {
 
 	for _, transition := range p.current.transitions {
 		if transition.condition.Matches(char) {
-			p.handleTransition(char, transition)
+			p.handleTransition(index, char, transition)
 
 			return true
 		}
@@ -127,17 +130,17 @@ func (p *blockParser) IsFinished() bool {
 	return p.current != nil && p.current.isFinal
 }
 
-// Get - извлекает из автомата ключевые слова. Следует вызывать только после проверки
-// достижения конечного состояния IsFinished.
-func (p *blockParser) Get() []code.Keyword {
+// Get - извлекает из текста ключевые слова исходя из состояния автомата.
+// Следует вызывать только после проверки достижения конечного состояния IsFinished.
+func (p *blockParser) Get(text []rune) []code.Keyword {
 	return []code.Keyword{{
-		Value:        p.result.value.String(),
+		Value:        string(text[p.result.start : p.result.end+1]),
 		Type:         p.result.keywordType,
 		StandardType: p.result.subType,
 	}}
 }
 
-func (p *blockParser) handleTransition(char rune, transition stateTransition) {
+func (p *blockParser) handleTransition(index int, char rune, transition stateTransition) {
 	p.current = transition.target
 	if transition.modifyResult != nil {
 		transition.modifyResult(&p.result)
@@ -145,5 +148,8 @@ func (p *blockParser) handleTransition(char rune, transition stateTransition) {
 	if char == 0 || transition.isCharIgnored {
 		return
 	}
-	p.result.value.WriteRune(char)
+	if transition.start {
+		p.result.start = index
+	}
+	p.result.end = index
 }

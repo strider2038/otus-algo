@@ -52,7 +52,7 @@ var codePattern = pattern{
 		"ост_с": {{condition: exact('т'), target: "ост_т", isCharIgnored: true}},
 		"ост_т": {{condition: space{}, target: "гост_пробел_разделитель", modifyResult: setStandardType(code.OST), isCharIgnored: true}},
 		"гост_пробел": {
-			{condition: digit{}, target: "гост_цифра"},
+			{condition: digit{}, target: "гост_цифра", start: true},
 			{condition: space{}, target: "гост_пробел", isCharIgnored: true},
 			{condition: exact('р'), target: "гост_р", isCharIgnored: true},
 			{condition: exact('и'), target: "гост_исо_и", isCharIgnored: true},
@@ -60,12 +60,12 @@ var codePattern = pattern{
 		},
 		"din_пробел": {
 			{condition: exact('e'), target: "din_en_e", isCharIgnored: true},
-			{condition: digit{}, target: "гост_цифра"},
+			{condition: digit{}, target: "гост_цифра", start: true},
 			{condition: space{}, target: "din_пробел", isCharIgnored: true},
 		},
 		"ту_пробел": {
 			{condition: exact('у'), target: "ту_у_у", isCharIgnored: true},
-			{condition: digit{}, target: "гост_цифра"},
+			{condition: digit{}, target: "гост_цифра", start: true},
 			{condition: space{}, target: "ту_пробел", isCharIgnored: true},
 		},
 		"ст_пробел": {
@@ -85,7 +85,7 @@ var codePattern = pattern{
 			{condition: space{}, target: "гост_р_пробел", isCharIgnored: true},
 		},
 		"гост_р_пробел": {
-			{condition: digit{}, target: "гост_цифра"},
+			{condition: digit{}, target: "гост_цифра", start: true},
 			{condition: space{}, target: "гост_р_пробел", isCharIgnored: true},
 			{condition: exact('и'), target: "гост_исо_и", isCharIgnored: true},
 			{condition: exact('i'), target: "гост_iso_i", isCharIgnored: true},
@@ -113,7 +113,7 @@ var codePattern = pattern{
 		"ст_цкба_б": {{condition: exact('а'), target: "ст_цкба_а", isCharIgnored: true}},
 		"ст_цкба_а": {{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true}},
 		"гост_пробел_разделитель": {
-			{condition: digit{}, target: "гост_цифра"},
+			{condition: digit{}, target: "гост_цифра", start: true},
 			{condition: space{}, target: "гост_пробел_разделитель", isCharIgnored: true},
 		},
 		"гост_цифра": {
@@ -141,7 +141,7 @@ var codePattern = pattern{
 		"исполнение_п": {
 			{condition: exact('о'), target: "исполнение_о", isCharIgnored: true},
 			{condition: exact('.'), target: "исполнение_точка", isCharIgnored: true},
-			{condition: digit{}, target: "вариация_код"},
+			{condition: digit{}, target: "вариация_код", start: true},
 			{condition: space{}, target: "исполнение_пробел", isCharIgnored: true},
 		},
 		"исполнение_о":   {{condition: exact('л'), target: "исполнение_л", isCharIgnored: true}},
@@ -155,16 +155,16 @@ var codePattern = pattern{
 		},
 		"исполнение_е_2": {
 			{condition: space{}, target: "исполнение_пробел", isCharIgnored: true},
-			{condition: digit{}, target: "вариация_код"},
+			{condition: digit{}, target: "вариация_код", start: true},
 		},
 		"исполнение_я": {{condition: space{}, target: "исполнение_пробел", isCharIgnored: true}},
 		"исполнение_точка": {
 			{condition: space{}, target: "исполнение_пробел", isCharIgnored: true},
-			{condition: variationCode{}, target: "вариация_код"},
+			{condition: variationCode{}, target: "вариация_код", start: true},
 		},
 		"исполнение_пробел": {
-			{condition: digit{}, target: "вариация_код"},
-			{condition: variationCode{}, target: "вариация_буквенный_код_1"},
+			{condition: digit{}, target: "вариация_код", start: true},
+			{condition: variationCode{}, target: "вариация_буквенный_код_1", start: true},
 			{condition: space{}, target: "исполнение_пробел", isCharIgnored: true},
 		},
 
@@ -204,8 +204,8 @@ var codePattern = pattern{
 		"класс_точности_т_2": {{condition: exact('и'), target: "класс_точности_и", isCharIgnored: true}},
 		"класс_точности_и":   {{condition: space{}, target: "класс_точности_пробел_2", isCharIgnored: true}},
 		"класс_точности_пробел_2": {
-			{condition: digit{}, target: "вариация_код"},
-			{condition: variationCode{}, target: "вариация_буквенный_код_1"},
+			{condition: digit{}, target: "вариация_код", start: true},
+			{condition: variationCode{}, target: "вариация_буквенный_код_1", start: true},
 			{condition: space{}, target: "класс_точности_пробел_2", isCharIgnored: true},
 		},
 
@@ -221,8 +221,8 @@ var codePattern = pattern{
 		},
 		"тип_а": {{condition: space{}, target: "тип_пробел", isCharIgnored: true}},
 		"тип_пробел": {
-			{condition: digit{}, target: "вариация_код"},
-			{condition: variationCode{}, target: "вариация_буквенный_код_1"},
+			{condition: digit{}, target: "вариация_код", start: true},
+			{condition: variationCode{}, target: "вариация_буквенный_код_1", start: true},
 			{condition: space{}, target: "тип_пробел", isCharIgnored: true},
 		},
 

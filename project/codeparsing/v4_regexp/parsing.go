@@ -2,6 +2,7 @@ package v4_regexp
 
 import (
 	"regexp"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 
@@ -24,30 +25,53 @@ func Parse(text string) []code.Keyword {
 	// 2) удаляем лишние пробелы;
 	// 3) добавляем пробел в конец вместо терминального символа.
 
-	// todo: strings builder
-	cleaned := make([]rune, 0, utf8.RuneCountInString(text)+1)
+	cleaned := strings.Builder{}
+	cleaned.Grow(utf8.RuneCountInString(text) + 1)
+	isSpace := false
 	ignoreSpace := true
 	for _, c := range text {
-		if unicode.IsSpace(c) {
+		isSpace = unicode.IsSpace(c)
+		if isSpace {
 			if ignoreSpace {
 				continue
 			}
 
-			cleaned = append(cleaned, ' ')
+			cleaned.WriteRune(' ')
 			ignoreSpace = true
 		} else {
-			cleaned = append(cleaned, unicode.ToLower(c))
+			cleaned.WriteRune(unicode.ToLower(c))
 			ignoreSpace = false
 		}
 	}
 
 	// добавление пробела в конец строки вместо терминального символа
-	// за счет этого не нужно принудительно вызывать Finish()
-	if len(cleaned) > 0 && cleaned[len(cleaned)-1] != ' ' {
-		cleaned = append(cleaned, ' ')
+	if !isSpace {
+		cleaned.WriteRune(' ')
 	}
 
-	return parseKeywords(string(cleaned))
+	return parseKeywords(cleaned.String())
+}
+
+func parseKeywords(text string) []code.Keyword {
+	keywords := make([]code.Keyword, 0)
+
+	for offset := 0; offset < len(text); {
+		// пробелы сразу игнорируются
+		for ; offset < len(text) && text[offset] == ' '; offset++ {
+		}
+
+		// поочередно пытаемся применить каждый конечный автомат к блоку начиная с offset
+		for _, parser := range blockParsers {
+			if kw, parsedCount := parser.Parse(text[offset:]); parsedCount > 0 {
+				keywords = append(keywords, kw...)
+				offset += parsedCount
+
+				break
+			}
+		}
+	}
+
+	return keywords
 }
 
 var blockParsers = []*blockParser{
@@ -123,28 +147,4 @@ var blockParsers = []*blockParser{
 		pattern:     regexp.MustCompile(`(\S+) `),
 		index:       1,
 	},
-}
-
-func parseKeywords(text string) []code.Keyword {
-	keywords := make([]code.Keyword, 0)
-
-	for offset := 0; offset < len(text); {
-		// пробелы сразу игнорируются
-		for ; offset < len(text) && text[offset] == ' '; offset++ {
-		}
-
-		// поочередно пытаемся применить каждый конечный автомат к блоку начиная с offset
-		for _, parser := range blockParsers {
-			if kw, parsedCount := parser.Parse(text[offset:]); parsedCount > 0 {
-				keywords = append(keywords, kw...)
-				offset += parsedCount
-
-				break
-			}
-		}
-
-		// todo: fallback algo
-	}
-
-	return keywords
 }

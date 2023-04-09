@@ -20,10 +20,11 @@ type pattern struct {
 
 // patternTransition - параметры перехода в следующее состояние.
 type patternTransition struct {
-	condition    matcher
-	target       string
-	modifyResult func(result *result)
+	condition matcher
+	target    string
 
+	modifyResult  func(result *result)
+	start         bool // текущая позиция помечается как начало целевого отрезка
 	isCharIgnored bool // символ не добавляется в результат при этом переходе
 }
 
