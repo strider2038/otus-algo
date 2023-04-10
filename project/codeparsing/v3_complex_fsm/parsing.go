@@ -24,9 +24,11 @@ func Parse(text string) []code.Keyword {
 	// 3) добавляем пробел в конец вместо терминального символа.
 
 	cleaned := make([]rune, 0, utf8.RuneCountInString(text)+1)
+	isSpace := false
 	ignoreSpace := true
 	for _, c := range text {
-		if unicode.IsSpace(c) {
+		isSpace = unicode.IsSpace(c)
+		if isSpace {
 			if ignoreSpace {
 				continue
 			}
@@ -41,7 +43,7 @@ func Parse(text string) []code.Keyword {
 
 	// добавление пробела в конец строки вместо терминального символа
 	// за счет этого не нужно принудительно вызывать Finish()
-	if len(cleaned) > 0 && cleaned[len(cleaned)-1] != ' ' {
+	if !isSpace {
 		cleaned = append(cleaned, ' ')
 	}
 
@@ -52,8 +54,7 @@ func Parse(text string) []code.Keyword {
 // блоков ключевых слов.
 var blockParsers = []*stateMachine{
 	newStateMachine(codePattern),
-	newStateMachine(naturalWordPattern),
-	newStateMachine(genericCodePattern),
+	newStateMachine(genericPattern),
 }
 
 func parseKeywords(text []rune) []code.Keyword {

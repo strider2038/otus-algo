@@ -35,19 +35,18 @@ type stateTransition struct {
 
 // stateMachine - конечный автомат для разбора строки.
 type stateMachine struct {
-	keywordType code.KeywordType
-	root        *state
+	root *state
 }
 
 // newStateMachine - создает на основе человеко-читаемой конфигурации паттерна
 // конечный автомат с деревом переходов.
-func newStateMachine(p pattern) *stateMachine {
-	states := make([]state, len(p.nodes)+2)
+func newStateMachine(nodes pattern) *stateMachine {
+	states := make([]state, len(nodes)+2)
 	states[len(states)-1].isFinal = true
-	indices := make(map[string]int, len(p.nodes)+2)
+	indices := make(map[string]int, len(nodes)+2)
 
 	index := 1
-	for key := range p.nodes {
+	for key := range nodes {
 		if key == initialState {
 			indices[key] = 0
 		} else {
@@ -57,7 +56,7 @@ func newStateMachine(p pattern) *stateMachine {
 	}
 	indices[finalState] = len(states) - 1
 
-	for key, nodeTransitions := range p.nodes {
+	for key, nodeTransitions := range nodes {
 		transitions := make([]stateTransition, len(nodeTransitions))
 		for j, transition := range nodeTransitions {
 			transitions[j].condition = transition.condition
@@ -70,16 +69,12 @@ func newStateMachine(p pattern) *stateMachine {
 		states[indices[key]].transitions = transitions
 	}
 
-	return &stateMachine{
-		keywordType: p.keywordType,
-		root:        &states[0],
-	}
+	return &stateMachine{root: &states[0]}
 }
 
 // Start - инициализирует парсер с пустым состоянием.
 func (m *stateMachine) Start() *blockParser {
-	p := &blockParser{root: m.root}
-	p.result.keywordType = m.keywordType
+	p := &blockParser{root: m.root, current: m.root}
 
 	return p
 }
@@ -97,19 +92,9 @@ type blockParser struct {
 // После прерывания необходимо проверить перешел ли автомат в конечное состояние
 // вызовом метода IsFinished.
 func (p *blockParser) Handle(index int, char rune) bool {
-	// автомат еще не начал свою работу, состояние пустое
-	if p.current == nil {
+	// автомат еще не начал свою работу
+	if p.current == p.root {
 		p.result.start = index
-
-		for _, transition := range p.root.transitions {
-			if transition.condition.Matches(char) {
-				p.handleTransition(index, char, transition)
-
-				return true
-			}
-		}
-
-		return false
 	}
 
 	for _, transition := range p.current.transitions {

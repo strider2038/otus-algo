@@ -13,10 +13,7 @@ type matcher interface {
 
 // pattern - конфигурация для конечного автомата с картой переходов.
 // Используется только для удобного конфигурирования конечного автомата.
-type pattern struct {
-	nodes       map[string][]patternTransition
-	keywordType code.KeywordType
-}
+type pattern map[string][]patternTransition
 
 // patternTransition - параметры перехода в следующее состояние.
 type patternTransition struct {
@@ -26,6 +23,12 @@ type patternTransition struct {
 	modifyResult  func(result *result)
 	start         bool // текущая позиция помечается как начало целевого отрезка
 	isCharIgnored bool // символ не добавляется в результат при этом переходе
+}
+
+type always struct{}
+
+func (a always) Matches(c rune) bool {
+	return true
 }
 
 type exact rune
@@ -45,12 +48,6 @@ type space struct{}
 func (s space) Matches(c rune) bool {
 	// оптимизация: простое сравнение с пробелом за счет предобработки
 	return c == ' '
-}
-
-type notSpace struct{}
-
-func (d notSpace) Matches(c rune) bool {
-	return c > 0 && c != ' '
 }
 
 type letter struct{}
