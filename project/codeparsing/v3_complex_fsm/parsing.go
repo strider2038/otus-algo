@@ -69,8 +69,7 @@ func parseKeywords(text []rune) []code.Keyword {
 		for _, blockParser := range blockParsers {
 			parser := blockParser.Start()
 			parsedCount := 0
-			i := offset
-			for ; i < len(text); i++ {
+			for i := offset; i < len(text); i++ {
 				if parser.Handle(i, text[i]) {
 					parsedCount++
 				} else {

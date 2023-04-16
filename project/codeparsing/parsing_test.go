@@ -1,14 +1,14 @@
 package codeparsing_test
 
 import (
-	"github.com/strider2038/otus-algo/project/codeparsing/v1_base"
-	"github.com/strider2038/otus-algo/project/codeparsing/v2_preprocessing"
-	"github.com/strider2038/otus-algo/project/codeparsing/v3_complex_fsm"
-	"github.com/strider2038/otus-algo/project/codeparsing/v4_regexp"
 	"testing"
 
 	"github.com/strider2038/otus-algo/datatesting"
 	"github.com/strider2038/otus-algo/project/codeparsing/code"
+	"github.com/strider2038/otus-algo/project/codeparsing/v1_base"
+	"github.com/strider2038/otus-algo/project/codeparsing/v2_preprocessing"
+	"github.com/strider2038/otus-algo/project/codeparsing/v3_complex_fsm"
+	"github.com/strider2038/otus-algo/project/codeparsing/v4_regexp"
 )
 
 const boltName = ` 

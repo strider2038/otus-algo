@@ -60,7 +60,7 @@ func parseKeywords(text string) []code.Keyword {
 		for ; offset < len(text) && text[offset] == ' '; offset++ {
 		}
 
-		// поочередно пытаемся применить каждый конечный автомат к блоку начиная с offset
+		// поочередно пытаемся применить каждый парсер к блоку начиная с offset
 		for _, parser := range blockParsers {
 			if kw, parsedCount := parser.Parse(text[offset:]); parsedCount > 0 {
 				keywords = append(keywords, kw...)
