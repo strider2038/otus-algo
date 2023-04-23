@@ -19,8 +19,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Change dir
+        run: cd ./hw-22-probabilistic-algorithm
+
       - name: Set up dependencies
         run: go mod download
 
       - name: Run tests
-        run: go test -v ./hw-22-probabilistic-algorithm/...
+        run: go test -v ./...
