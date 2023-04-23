@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"bloom/bloom"
+	bitsbloom "github.com/bits-and-blooms/bloom/v3"
 	"github.com/strider2038/otus-algo/datatesting"
 )
 
@@ -40,6 +41,108 @@ func TestFilter_Contains(t *testing.T) {
 }
 
 func TestBigDataSet(t *testing.T) {
+	const rowsCount = 500_000
+	const maxValues = 100_000
+	presentValues := make([]string, 0, maxValues)
+	absentValues := make([]string, 0, maxValues)
+	readDataSet(t, func(value string, isPresent bool) {
+		if isPresent {
+			if len(presentValues) < maxValues {
+				presentValues = append(presentValues, value)
+			}
+		} else if len(absentValues) < maxValues {
+			absentValues = append(absentValues, value)
+		}
+	})
+
+	possibilities := []float64{0.1, 0.01, 0.001}
+	for _, p := range possibilities {
+		t.Run(fmt.Sprintf("%f", p), func(t *testing.T) {
+			filter := bloom.NewFilter(rowsCount, p)
+			count := 0
+			readDataSet(t, func(value string, isPresent bool) {
+				if isPresent {
+					filter.Add(value)
+					count++
+				}
+			})
+
+			totalPositives := 0
+			falsePositives := 0
+			for _, value := range presentValues {
+				contains := filter.Contains(value)
+				datatesting.AssertTrue(t, contains)
+				if contains {
+					totalPositives++
+				}
+			}
+			for _, value := range absentValues {
+				if filter.Contains(value) {
+					totalPositives++
+					falsePositives++
+				}
+			}
+			t.Log("total count:", count)
+			t.Log("total positives:", totalPositives)
+			t.Log("false positives:", falsePositives)
+			t.Log("false positives rate:", float64(falsePositives)/float64(totalPositives))
+			t.Log("size (KB):", filter.SizeBytes()/1024)
+		})
+	}
+}
+
+func TestBigDataSet_ForeignAlgo(t *testing.T) {
+	const rowsCount = 500_000
+	const maxValues = 100_000
+	presentValues := make([]string, 0, maxValues)
+	absentValues := make([]string, 0, maxValues)
+	readDataSet(t, func(value string, isPresent bool) {
+		if isPresent {
+			if len(presentValues) < maxValues {
+				presentValues = append(presentValues, value)
+			}
+		} else if len(absentValues) < maxValues {
+			absentValues = append(absentValues, value)
+		}
+	})
+
+	possibilities := []float64{0.1, 0.01, 0.001}
+	for _, p := range possibilities {
+		t.Run(fmt.Sprintf("%f", p), func(t *testing.T) {
+			filter := bitsbloom.NewWithEstimates(rowsCount, p)
+			count := 0
+			readDataSet(t, func(value string, isPresent bool) {
+				if isPresent {
+					filter.AddString(value)
+					count++
+				}
+			})
+
+			totalPositives := 0
+			falsePositives := 0
+			for _, value := range presentValues {
+				contains := filter.TestString(value)
+				datatesting.AssertTrue(t, contains)
+				if contains {
+					totalPositives++
+				}
+			}
+			for _, value := range absentValues {
+				if filter.TestString(value) {
+					totalPositives++
+					falsePositives++
+				}
+			}
+			t.Log("total count:", count)
+			t.Log("total positives:", totalPositives)
+			t.Log("false positives:", falsePositives)
+			t.Log("false positives rate:", float64(falsePositives)/float64(totalPositives))
+			t.Log("size (KB):", 16+len(filter.BitSet().Bytes())*8/1024)
+		})
+	}
+}
+
+func readDataSet(t *testing.T, f func(value string, isPresent bool)) {
 	file, err := os.Open("./../testdata/urldata.csv")
 	if os.IsNotExist(err) {
 		t.Skip("dataset not found, skipping test")
@@ -48,63 +151,20 @@ func TestBigDataSet(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer file.Close()
-	data := csv.NewReader(file)
-	data.Read()
+	rows := csv.NewReader(file)
+	rows.Read()
 
-	const maxValues = 10000
-	presentValues := make([]string, 0, maxValues)
-	absentValues := make([]string, 0, maxValues)
-
-	count := 0
-	goodCount := 0
-	badCount := 0
-	filter := bloom.NewFilter(500_000, 0.01)
 	for {
-		row, err := data.Read()
+		row, err := rows.Read()
 		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
-			fmt.Println(count, err)
 			continue
 		}
 		if len(row) < 2 {
 			t.Fatal("unexpected number of records")
 		}
-		if row[1] == "good" {
-			filter.Add(row[0])
-			count++
-			if len(presentValues) < maxValues {
-				presentValues = append(presentValues, row[0])
-			}
-			goodCount++
-		} else {
-			badCount++
-			if len(absentValues) < maxValues {
-				absentValues = append(absentValues, row[0])
-			}
-		}
+		f(row[0], row[1] == "good")
 	}
-
-	fmt.Println(goodCount, badCount)
-
-	totalPositives := 0
-	falsePositives := 0
-	for _, value := range presentValues {
-		contains := filter.Contains(value)
-		datatesting.AssertTrue(t, contains)
-		if contains {
-			totalPositives++
-		}
-	}
-	for _, value := range absentValues {
-		if filter.Contains(value) {
-			totalPositives++
-			falsePositives++
-		}
-	}
-	t.Log("total count:", count)
-	t.Log("total positives:", totalPositives)
-	t.Log("false positives:", falsePositives)
-	t.Log("false positives rate:", float64(falsePositives)/float64(totalPositives)*100)
 }

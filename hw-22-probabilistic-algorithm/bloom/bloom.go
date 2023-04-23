@@ -48,6 +48,10 @@ func (f *Filter) Contains(value string) bool {
 	return true
 }
 
+func (f *Filter) SizeBytes() int {
+	return 8 + 8 + len(f.bits)*8
+}
+
 func hash(value string, seed uint) uint {
 	h := sha256.Sum256(binary.LittleEndian.AppendUint64([]byte(value), uint64(seed)))
 
